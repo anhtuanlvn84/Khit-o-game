@@ -293,21 +293,66 @@ function hint(){
 }
 function createGhost(p){let cells=transformed(p),b=bounds(cells),wrap=document.createElement('div');wrap.style.position='fixed';wrap.style.zIndex='25';wrap.style.pointerEvents='none';wrap.style.width=cell*b.w+'px';wrap.style.height=cell*b.h+'px';wrap.style.opacity='.88';wrap.style.filter='drop-shadow(0 13px 20px #0008)';wrap.id='drag-ghost';for(const c of cells)wrap.append(tile(p.color,c.x,c.y,cell));document.body.append(wrap);return wrap;}
 function moveGhost(px,py){if(!drag?.ghost)return;const p=pieces.find(p=>p.id===drag.id),b=bounds(transformed(p));drag.ghost.style.left=(px-b.w*cell/2)+'px';drag.ghost.style.top=(py-b.h*cell/2)+'px';}
+// Tự cuộn khi kéo mảnh sát mép màn hình trên iOS, Android và trình duyệt desktop.
+// Dùng vòng lặp animation frame để vẫn cuộn khi ngón tay giữ yên.
+let dragScrollFrame=0;
+function stopDragAutoScroll(){
+  if(dragScrollFrame)cancelAnimationFrame(dragScrollFrame);
+  dragScrollFrame=0;
+}
+function dragAutoScrollTick(){
+  dragScrollFrame=0;
+  if(!drag||!drag.moved)return;
+  const viewportHeight=window.visualViewport?.height||window.innerHeight;
+  const viewportTop=window.visualViewport?.offsetTop||0;
+  const edge=Math.min(115,Math.max(65,viewportHeight*.16));
+  const y=drag.lastY-viewportTop;
+  let speed=0;
+  if(y<edge)speed=-Math.min(17,Math.max(0,(edge-y)/edge)*17);
+  else if(y>viewportHeight-edge)speed=Math.min(17,Math.max(0,(y-(viewportHeight-edge))/edge)*17);
+  if(speed){
+    // Ưu tiên cuộn trang chính; nếu trang không thể cuộn, cuộn vùng chứa mảnh.
+    const before=window.scrollY;
+    window.scrollBy(0,speed);
+    let didScroll=window.scrollY!==before;
+    if(!didScroll){
+      const tray=document.querySelector('.piece-scroll');
+      if(tray){
+        const r=tray.getBoundingClientRect();
+        if(drag.lastX>=r.left&&drag.lastX<=r.right&&drag.lastY>=r.top&&drag.lastY<=r.bottom){
+          const old=tray.scrollTop;
+          tray.scrollTop+=speed;
+          didScroll=tray.scrollTop!==old;
+        }
+      }
+    }
+    if(didScroll){
+      const p=pieces.find(q=>q.id===drag.id);
+      hoverPos=p&&nearBoard(drag.lastX,drag.lastY)?getAnchor(drag.lastX,drag.lastY,p):null;
+      renderPreview();
+    }
+  }
+  dragScrollFrame=requestAnimationFrame(dragAutoScrollTick);
+}
+function startDragAutoScroll(){
+  if(!dragScrollFrame)dragScrollFrame=requestAnimationFrame(dragAutoScrollTick);
+}
 function onPointerDown(e){
   if(gameFinished||drag||(e.pointerType==='mouse'&&e.button!==0))return;
   const pieceCard=e.target.closest('.piece-card');const placedPiece=e.target.closest('.placed-piece');if(!pieceCard&&!placedPiece)return;
   const p=pieces.find(p=>p.id===Number((pieceCard||placedPiece).dataset.id));if(!p||(pieceCard&&p.placement))return;
-  if(e.cancelable)e.preventDefault();selectedId=p.id;drag={id:p.id,x:e.clientX,y:e.clientY,moved:false,fromBoard:!!placedPiece,ghost:null};
+  if(e.cancelable)e.preventDefault();selectedId=p.id;drag={id:p.id,x:e.clientX,y:e.clientY,lastX:e.clientX,lastY:e.clientY,pointerType:e.pointerType,moved:false,fromBoard:!!placedPiece,ghost:null};
   // Không dựng lại DOM ngay trong pointerdown: giữ nguyên đối tượng cho thao tác cảm ứng.
 }
 function onPointerMove(e){
   if(!drag)return;
   const p=pieces.find(p=>p.id===drag.id);if(!p)return;
+  drag.lastX=e.clientX;drag.lastY=e.clientY;
   if(!drag.moved&&Math.hypot(e.clientX-drag.x,e.clientY-drag.y)>7){drag.moved=true;drag.ghost=createGhost(p);}
-  if(drag.moved){moveGhost(e.clientX,e.clientY);hoverPos=nearBoard(e.clientX,e.clientY)?getAnchor(e.clientX,e.clientY,p):null;renderPreview();}
+  if(drag.moved){moveGhost(e.clientX,e.clientY);hoverPos=nearBoard(e.clientX,e.clientY)?getAnchor(e.clientX,e.clientY,p):null;renderPreview();startDragAutoScroll();}
 }
 function onPointerUp(e){
-  if(!drag)return;const was=drag;drag=null;was.ghost?.remove();const p=pieces.find(p=>p.id===was.id);
+  if(!drag)return;stopDragAutoScroll();const was=drag;drag=null;was.ghost?.remove();const p=pieces.find(p=>p.id===was.id);
   if(!p)return;
   ignoreBoardClickUntil=Date.now()+350;
   if(!was.moved){selectPiece(p.id);return;}
@@ -328,7 +373,7 @@ $('piece-grid').addEventListener('pointerdown',onPointerDown);
 elBoard.addEventListener('pointerdown',onPointerDown);
 window.addEventListener('pointermove',onPointerMove,{passive:true});
 window.addEventListener('pointerup',onPointerUp);
-window.addEventListener('pointercancel',e=>{if(drag){drag.ghost?.remove();drag=null;hoverPos=null;render();}});
+window.addEventListener('pointercancel',e=>{if(drag){stopDragAutoScroll();drag.ghost?.remove();drag=null;hoverPos=null;render();}});
 elBoard.addEventListener('pointermove',onBoardMove);
 elBoard.addEventListener('pointerleave',()=>{if(!drag){hoverPos=null;renderPreview();}});
 elBoard.addEventListener('click',onBoardClick);
