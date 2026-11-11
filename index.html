@@ -35,6 +35,7 @@
     .foot{display:flex;align-items:flex-start;gap:12px;margin-top:20px;color:#b7c6dc;font-size:13px;padding:1px 5px}.foot .symbol{font-size:23px;color:#ffcf87;line-height:1}.foot p{margin:0}.foot kbd{font:700 11px inherit;border:1px solid #50617a;background:#24344c;border-radius:5px;padding:2px 6px;color:#e8f5ff}
     #toast{position:fixed;left:50%;bottom:25px;transform:translate(-50%,20px);z-index:20;opacity:0;pointer-events:none;border:1px solid #548a90;background:#153b46;color:#d9fff7;border-radius:12px;padding:12px 20px;box-shadow:0 14px 40px #0008;max-width:calc(100% - 28px);text-align:center;font-weight:700;font-size:13px;transition:opacity .2s,transform .2s}#toast.show{opacity:1;transform:translate(-50%,0)}
     .modal-backdrop{position:fixed;inset:0;z-index:30;display:none;align-items:center;justify-content:center;background:#08111bdb;backdrop-filter:blur(8px);padding:20px}.modal-backdrop.show{display:flex}.modal{position:relative;text-align:center;overflow:hidden;max-width:440px;width:100%;border-radius:25px;padding:36px 31px;background:linear-gradient(145deg,#233f4e,#1c2a46);border:1px solid #5e9e9e;box-shadow:0 26px 100px #0009}.trophy{font-size:56px;line-height:1.1}.modal h2{font-size:30px;margin:14px 0 8px}.modal p{color:#bcd0df;margin:0 0 20px}.modal .result{display:flex;justify-content:space-evenly;gap:15px;margin-bottom:25px;background:#172e3cb0;border-radius:12px;padding:14px}.modal .result strong{display:block;font-size:24px;color:#9cf5dd}.modal .result span{font-size:12px;color:#a8bacd}.modal .modal-actions{display:flex;gap:9px;justify-content:center}.modal .action{padding:13px 18px}.confetti{position:absolute;width:9px;height:17px;opacity:.9;animation:fall 3s linear infinite;top:-25px;pointer-events:none}@keyframes fall{to{transform:translateY(520px) rotate(520deg)}}
+    .piece-count-select{display:flex;align-items:center;gap:5px;border:1px solid #5d7897;border-radius:99px;padding:5px 9px 5px 11px;background:#233750;color:#dbeaff;white-space:nowrap;cursor:pointer;flex:none}.piece-count-select select{appearance:none;-webkit-appearance:none;border:0;background:transparent;color:inherit;font:inherit;font-size:12px;outline:none;cursor:pointer;max-width:100px}.piece-count-select select option{background:#233750;color:white}.piece-count-select span{font-size:16px;line-height:1;pointer-events:none;color:#8df2d8}.piece-count-select:focus-within{outline:2px solid #79f3d7;outline-offset:2px}
     @media(max-width:950px){.layout{grid-template-columns:1fr}.right .piece-scroll{max-height:none}.piece-grid{grid-template-columns:repeat(5,minmax(0,1fr))}.board-stage{min-height:400px}.right{min-height:0}}
     @media(max-width:590px){.app{padding:22px 12px 35px}.top{align-items:flex-start;margin-bottom:25px}.logo{width:43px;height:43px}.brand{gap:11px}.top h1{font-size:27px;letter-spacing:-1px}.top p{font-size:12px}.status{font-size:0;padding:12px;gap:0}.status::before{width:10px;height:10px}.levelbar{gap:7px}.section-label{width:100%;margin-bottom:1px}.level{font-size:12px;padding:8px 10px;border-radius:9px}.panel{border-radius:17px}.panel-head{padding:18px 17px 13px}.panel-title{font-size:17px}.panel-note{font-size:12px}.board-stage{min-height:325px;padding:21px 8px}.board-bottom{padding:18px}.piece-scroll{padding:1px 11px 16px}.piece-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.tools{padding:16px 11px}.stats .stat{padding-left:10px}.stat .v{font-size:16px}.stat .k{font-size:10px}.small-pill{font-size:11px}}
     /* Bố cục mới: tiến độ ở trên, bảng ghép ở dưới; giữ nguyên hành vi trò chơi. */
@@ -46,6 +47,13 @@
     .left .board-stage{flex:1;border-top:1px solid #ffffff09;border-bottom:0}
     @media(max-width:590px){.left .board-bottom{padding:19px 17px 20px}.left .progress-top,.left .progress-top .num{font-size:17px}.left .board-stage{min-height:325px}}
     @media(prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;transition-duration:.001ms!important}}
+
+    /* Bộ chọn số mảnh: rộng hơn, chữ và tam giác cùng hàng */
+    .piece-count-select{min-width:142px;min-height:43px;padding:7px 13px 7px 16px;gap:9px;display:flex;align-items:center;justify-content:space-between;position:relative}
+    .piece-count-select select{font-size:15px;font-weight:700;max-width:none;width:100%;min-width:0;padding-right:20px;line-height:1.3;position:relative;z-index:2}
+    .piece-count-select .dropdown-triangle{position:absolute;right:13px;top:50%;transform:translateY(-35%);width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:9px solid #278cff;pointer-events:none}
+    .tool .tool-word{font-size:16px;font-weight:800}
+    @media(max-width:590px){.piece-count-select{min-width:125px;min-height:40px;padding-left:12px;padding-right:11px}.piece-count-select select{font-size:14px}.piece-count-select .dropdown-triangle{right:11px}.tool .tool-word{font-size:16px}}
   </style>
 </head>
 <body>
@@ -71,9 +79,9 @@
       <div class="board-stage" id="board-stage"><div id="board" aria-label="Khu vực thả các mảnh ghép"><div id="base-layer"></div><div id="placed-layer"></div><div id="hint-layer"></div><div id="preview-layer"></div></div></div>
     </section>
     <aside class="panel right" aria-label="Các mảnh ghép và công cụ">
-      <div class="panel-head"><div><h2 class="panel-title">Kho mảnh ghép</h2><p class="panel-note">Kéo mảnh vào bảng hoặc nhấp chọn rồi nhấp vị trí.</p></div><span class="small-pill" id="piece-count">— mảnh</span></div>
+      <div class="panel-head"><div><h2 class="panel-title">Kho mảnh ghép</h2><p class="panel-note">Kéo mảnh vào bảng hoặc nhấp chọn rồi nhấp vị trí.</p></div><label class="piece-count-select" title="Chọn số mảnh ghép"><select id="piece-number" aria-label="Chọn số mảnh ghép"></select><span class="dropdown-triangle" aria-hidden="true"></span></label></div>
       <div class="piece-scroll"><div class="piece-grid" id="piece-grid"></div></div>
-      <div class="tools"><p class="tools-title">Điều khiển mảnh đang chọn</p><div class="tool-grid"><button class="tool" id="rotate" title="Xoay 90 độ (phím R)"><b>↻</b> Xoay <small>R</small></button><button class="tool" id="flip" title="Lật gương (phím F)"><b>⇋</b> Lật <small>F</small></button><button class="tool" id="undo" title="Hoàn tác lần thao tác trước"><b>↶</b> Hoàn tác</button></div><div class="action-grid"><button class="action" id="hint">✦ Gợi ý vị trí</button><button class="action" id="reset">↺ Chơi lại</button><button class="action primary" id="new" style="grid-column:1/-1">⤨ Tạo bộ mảnh mới</button></div></div>
+      <div class="tools"><p class="tools-title">Điều khiển mảnh đang chọn</p><div class="tool-grid"><button class="tool" id="rotate" title="Xoay 90 độ (phím R)"><b>↻</b> <span class="tool-word">Xoay</span></button><button class="tool" id="flip" title="Lật gương (phím F)"><b>⇋</b> <span class="tool-word">Lật</span></button><button class="tool" id="undo" title="Hoàn tác lần thao tác trước"><b>↶</b> Hoàn tác</button></div><div class="action-grid"><button class="action" id="hint">✦ Gợi ý vị trí</button><button class="action" id="reset">↺ Chơi lại</button><button class="action primary" id="new" style="grid-column:1/-1">⤨ Tạo bộ mảnh mới</button></div></div>
     </aside>
   </main>
   <div class="foot"><span class="symbol">💡</span><p><b>Cách chơi:</b> Chọn mảnh ở khung bên phải, dùng <kbd>R</kbd> để xoay và <kbd>F</kbd> để lật, sau đó thả vào ô xám. Chỉ chấp nhận vị trí nằm hoàn toàn trong hình và không đè lên mảnh khác. Nhấp mảnh đã đặt để lấy lại. Hỗ trợ chuột và màn hình cảm ứng.</p></div>
@@ -99,6 +107,7 @@ const LEVELS = {
 const PALETTE=['#49d8ba','#8b89f5','#ffab72','#fc829f','#68b8f3','#e3b965','#a5d76d','#d98eeb','#f48d67','#5fd3da','#b2a1fc','#f6bc7d','#7cdb9b','#e590c8','#9dc0f5','#f4d370','#8dd6ba','#d5a2ed','#ff9aa9','#65b6db'];
 const $=id=>document.getElementById(id);
 const elBoard=$('board'),elBase=$('base-layer'),elPlaced=$('placed-layer'),elPreview=$('preview-layer'),elHint=$('hint-layer'),elGrid=$('piece-grid');
+let partitionChoices=new Map(),chosenCount=null;
 let level='cross',pieces=[],maskSet=new Set(),cols=0,rows=0,cell=38,selectedId=null,hoverPos=null,history=[],drag=null;
 let gameStarted=0,gameFinished=false,elapsedAtWin=0,toastTimeout=null,hintTimeout=null,currentHint=null,ignoreBoardClickUntil=0;
 const key=(x,y)=>x+','+y;
@@ -144,18 +153,45 @@ function makePartitions(all,maxSize,minSize){
   }
   return shuffle(best);
 }
-function startLevel(name){
-  level=name;let def=LEVELS[level];cols=Math.max(...def.mask.map(r=>r.length));rows=def.mask.length;
+// Mỗi lựa chọn lưu sẵn một cách chia thực tế: không đưa ra số mảnh
+// nếu game chưa tạo được bộ mảnh liên thông, phủ kín hình.
+function buildChoices(all,def){
+  const found=new Map();
+  const sizes=[def.size,4,5,6,7,8,9,10,11,12];
+  for(const size of sizes){
+    for(let attempt=0;attempt<5;attempt++){
+      const groups=makePartitions(all,size,Math.min(def.min,Math.max(2,size-2)));
+      if(groups && groups.length>=2 && groups.every(g=>g.length>=2)){
+        const count=groups.length;
+        if(!found.has(count))found.set(count,groups);
+      }
+    }
+  }
+  return found;
+}
+function startLevel(name,requestedCount=null,refreshChoices=false){
+  const isSameLevel=name===startLevel.lastLevel;level=name;let def=LEVELS[level];cols=Math.max(...def.mask.map(r=>r.length));rows=def.mask.length;
   const all=[];for(let y=0;y<rows;y++)for(let x=0;x<def.mask[y].length;x++)if(def.mask[y][x]==='#')all.push({x,y});
   maskSet=new Set(all.map(p=>key(p.x,p.y)));
-  const groups=makePartitions(all,def.size,def.min);
+  if(refreshChoices||name!==startLevel.lastLevel||!partitionChoices.size){
+    partitionChoices=buildChoices(all,def);
+    startLevel.lastLevel=name;
+  }
+  const counts=[...partitionChoices.keys()].sort((a,b)=>a-b);
+  if(!counts.length){const fallback=makePartitions(all,def.size,def.min);partitionChoices.set(fallback.length,fallback);counts.push(fallback.length);}
+  chosenCount=requestedCount!==null&&partitionChoices.has(Number(requestedCount))?Number(requestedCount):
+    (isSameLevel&&partitionChoices.has(chosenCount)?chosenCount:counts[Math.floor(counts.length/2)]);
+  const dropdown=$('piece-number');
+  dropdown.replaceChildren();
+  for(const count of counts){const opt=document.createElement('option');opt.value=count;opt.textContent=count+' mảnh';dropdown.append(opt);}
+  dropdown.value=String(chosenCount);
+  const groups=partitionChoices.get(chosenCount);
   pieces=groups.map((group,i)=>{
     const minX=Math.min(...group.map(p=>p.x)),minY=Math.min(...group.map(p=>p.y));
     return {id:i+1,base:group.map(({x,y})=>({x:x-minX,y:y-minY})),solution:{x:minX,y:minY},rot:rand(4),flip:Math.random()>.5,placement:null,color:PALETTE[i%PALETTE.length]};
   });
   pieces=shuffle(pieces);selectedId=pieces[0]?.id??null;history=[];drag=null;hoverPos=null;gameStarted=0;gameFinished=false;elapsedAtWin=0;clearHint();$('victory').classList.remove('show');
   document.querySelectorAll('.level').forEach(b=>{b.classList.toggle('active',b.dataset.level===name);b.setAttribute('aria-pressed',String(b.dataset.level===name));});
-  $('piece-count').textContent=pieces.length+' mảnh';
   resizeBoard();render();
 }
 function resizeBoard(){
@@ -198,9 +234,11 @@ function getAnchor(px,py,p){let rect=elBoard.getBoundingClientRect(),b=bounds(tr
 function nearBoard(px,py){const r=elBoard.getBoundingClientRect();return px>=r.left-cell&&px<=r.right+cell&&py>=r.top-cell&&py<=r.bottom+cell;}
 function renderPreview(){
   elPreview.replaceChildren();if(gameFinished||!hoverPos||!selectedId)return;const p=pieces.find(q=>q.id===selectedId);if(!p||(!drag&&p.placement))return;
-  const valid=check(p,hoverPos.x,hoverPos.y);for(const c of transformed(p)){
-    const x=hoverPos.x+c.x,y=hoverPos.y+c.y;if(x<0||y<0||x>=cols||y>=rows)continue;
-    const t=tile('',x,y,cell,'preview-cell'+(valid?'':' invalid'));elPreview.append(t);
+  // Chỉ vẽ vùng xem trước khi TOÀN BỘ mảnh nằm trong ô mục tiêu còn trống.
+  // Không hiển thị ô đỏ hay ô nằm ngoài hình khi vị trí không hợp lệ.
+  if(!check(p,hoverPos.x,hoverPos.y))return;
+  for(const c of transformed(p)){
+    elPreview.append(tile('',hoverPos.x+c.x,hoverPos.y+c.y,cell,'preview-cell'));
   }
 }
 function renderHint(){elHint.replaceChildren();if(!currentHint)return;const p=pieces.find(q=>q.id===currentHint);if(!p)return;
@@ -279,12 +317,13 @@ function onPointerUp(e){
   else if(was.fromBoard&&!near){saveHistory();p.placement=null;selectedId=p.id;render();showToast('Đã đưa mảnh về kho.');}
   else{render();showToast('Chỗ thả chưa hợp lệ. Hãy thử vị trí khác!');}
 }
-function onBoardMove(e){if(drag||gameFinished)return;const p=pieces.find(p=>p.id===selectedId);if(!p||p.placement)return;hoverPos=getAnchor(e.clientX,e.clientY,p);renderPreview();}
+function onBoardMove(e){if(drag||gameFinished||e.pointerType==='touch')return;const p=pieces.find(p=>p.id===selectedId);if(!p||p.placement)return;hoverPos=getAnchor(e.clientX,e.clientY,p);renderPreview();}
 function onBoardClick(e){
   if(drag||gameFinished||Date.now()<ignoreBoardClickUntil||e.target.closest('.placed-piece'))return;
   const p=pieces.find(p=>p.id===selectedId);if(!p||p.placement)return;
   const anchor=getAnchor(e.clientX,e.clientY,p);place(p,anchor.x,anchor.y);
 }
+$('piece-number').addEventListener('change',e=>{startLevel(level,Number(e.target.value));showToast('Đã tạo ván mới với '+chosenCount+' mảnh!');});
 $('piece-grid').addEventListener('pointerdown',onPointerDown);
 elBoard.addEventListener('pointerdown',onPointerDown);
 window.addEventListener('pointermove',onPointerMove,{passive:true});
@@ -294,10 +333,10 @@ elBoard.addEventListener('pointermove',onBoardMove);
 elBoard.addEventListener('pointerleave',()=>{if(!drag){hoverPos=null;renderPreview();}});
 elBoard.addEventListener('click',onBoardClick);
 $('rotate').addEventListener('click',()=>rotateOrFlip('rotate'));$('flip').addEventListener('click',()=>rotateOrFlip('flip'));$('undo').addEventListener('click',undo);
-$('hint').addEventListener('click',hint);$('reset').addEventListener('click',reset);$('new').addEventListener('click',()=>{startLevel(level);showToast('Đã tạo bộ mảnh mới, chắc chắn có lời giải!');});
+$('hint').addEventListener('click',hint);$('reset').addEventListener('click',reset);$('new').addEventListener('click',()=>{startLevel(level,chosenCount,true);showToast('Đã tạo bộ mảnh mới, chắc chắn có lời giải!');});
 $('victory-close').addEventListener('click',()=>$('victory').classList.remove('show'));
-$('victory-new').addEventListener('click',()=>{startLevel(level);showToast('Bắt đầu một ván mới!');});
-document.querySelectorAll('.level').forEach(b=>b.addEventListener('click',()=>startLevel(b.dataset.level)));
+$('victory-new').addEventListener('click',()=>{startLevel(level,chosenCount,true);showToast('Bắt đầu một ván mới!');});
+document.querySelectorAll('.level').forEach(b=>b.addEventListener('click',()=>startLevel(b.dataset.level,null,true)));
 window.addEventListener('keydown',e=>{
   if(e.altKey||e.ctrlKey||e.metaKey||e.target.closest('input,textarea,[contenteditable=true]'))return;
   const k=e.key.toLowerCase();if(k==='r'){e.preventDefault();rotateOrFlip('rotate');}else if(k==='f'){e.preventDefault();rotateOrFlip('flip');}else if(k==='z'){e.preventDefault();undo();}else if(k==='escape'){clearHint();selectedId=null;hoverPos=null;render();}
