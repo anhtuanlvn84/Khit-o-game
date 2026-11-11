@@ -37,6 +37,14 @@
     .modal-backdrop{position:fixed;inset:0;z-index:30;display:none;align-items:center;justify-content:center;background:#08111bdb;backdrop-filter:blur(8px);padding:20px}.modal-backdrop.show{display:flex}.modal{position:relative;text-align:center;overflow:hidden;max-width:440px;width:100%;border-radius:25px;padding:36px 31px;background:linear-gradient(145deg,#233f4e,#1c2a46);border:1px solid #5e9e9e;box-shadow:0 26px 100px #0009}.trophy{font-size:56px;line-height:1.1}.modal h2{font-size:30px;margin:14px 0 8px}.modal p{color:#bcd0df;margin:0 0 20px}.modal .result{display:flex;justify-content:space-evenly;gap:15px;margin-bottom:25px;background:#172e3cb0;border-radius:12px;padding:14px}.modal .result strong{display:block;font-size:24px;color:#9cf5dd}.modal .result span{font-size:12px;color:#a8bacd}.modal .modal-actions{display:flex;gap:9px;justify-content:center}.modal .action{padding:13px 18px}.confetti{position:absolute;width:9px;height:17px;opacity:.9;animation:fall 3s linear infinite;top:-25px;pointer-events:none}@keyframes fall{to{transform:translateY(520px) rotate(520deg)}}
     @media(max-width:950px){.layout{grid-template-columns:1fr}.right .piece-scroll{max-height:none}.piece-grid{grid-template-columns:repeat(5,minmax(0,1fr))}.board-stage{min-height:400px}.right{min-height:0}}
     @media(max-width:590px){.app{padding:22px 12px 35px}.top{align-items:flex-start;margin-bottom:25px}.logo{width:43px;height:43px}.brand{gap:11px}.top h1{font-size:27px;letter-spacing:-1px}.top p{font-size:12px}.status{font-size:0;padding:12px;gap:0}.status::before{width:10px;height:10px}.levelbar{gap:7px}.section-label{width:100%;margin-bottom:1px}.level{font-size:12px;padding:8px 10px;border-radius:9px}.panel{border-radius:17px}.panel-head{padding:18px 17px 13px}.panel-title{font-size:17px}.panel-note{font-size:12px}.board-stage{min-height:325px;padding:21px 8px}.board-bottom{padding:18px}.piece-scroll{padding:1px 11px 16px}.piece-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.tools{padding:16px 11px}.stats .stat{padding-left:10px}.stat .v{font-size:16px}.stat .k{font-size:10px}.small-pill{font-size:11px}}
+    /* Bố cục mới: tiến độ ở trên, bảng ghép ở dưới; giữ nguyên hành vi trò chơi. */
+    .left{display:flex;flex-direction:column}
+    .left .board-bottom{padding:24px 25px 22px}
+    .left .progress-top{font-size:19px;font-weight:800;align-items:center}
+    .left .progress-top .num{font-size:19px}
+    .left .progress-track{margin:15px 0 19px}
+    .left .board-stage{flex:1;border-top:1px solid #ffffff09;border-bottom:0}
+    @media(max-width:590px){.left .board-bottom{padding:19px 17px 20px}.left .progress-top,.left .progress-top .num{font-size:17px}.left .board-stage{min-height:325px}}
     @media(prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;transition-duration:.001ms!important}}
   </style>
 </head>
@@ -59,9 +67,8 @@
   </nav>
   <main class="layout">
     <section class="panel left" aria-label="Bảng xếp hình">
-      <div class="panel-head"><div><h2 class="panel-title">Hình mục tiêu</h2><p class="panel-note">Phủ kín vùng ô xám, không chồng lên nhau.</p></div><span class="small-pill" id="size-label">— ô</span></div>
-      <div class="board-stage" id="board-stage"><div id="board" aria-label="Khu vực thả các mảnh ghép"><div id="base-layer"></div><div id="placed-layer"></div><div id="hint-layer"></div><div id="preview-layer"></div></div></div>
       <div class="board-bottom"><div class="progress-top"><span>Tiến độ hoàn thành</span><span class="num" id="percent">0%</span></div><div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div><div class="stats"><div class="stat"><span class="k">Đã đặt</span><strong class="v" id="placed-stat">0 / 0</strong></div><div class="stat"><span class="k">Ô đã lấp</span><strong class="v" id="cell-stat">0 / 0</strong></div><div class="stat"><span class="k">Thời gian</span><strong class="v" id="time-stat">00:00</strong></div></div></div>
+      <div class="board-stage" id="board-stage"><div id="board" aria-label="Khu vực thả các mảnh ghép"><div id="base-layer"></div><div id="placed-layer"></div><div id="hint-layer"></div><div id="preview-layer"></div></div></div>
     </section>
     <aside class="panel right" aria-label="Các mảnh ghép và công cụ">
       <div class="panel-head"><div><h2 class="panel-title">Kho mảnh ghép</h2><p class="panel-note">Kéo mảnh vào bảng hoặc nhấp chọn rồi nhấp vị trí.</p></div><span class="small-pill" id="piece-count">— mảnh</span></div>
@@ -148,7 +155,7 @@ function startLevel(name){
   });
   pieces=shuffle(pieces);selectedId=pieces[0]?.id??null;history=[];drag=null;hoverPos=null;gameStarted=0;gameFinished=false;elapsedAtWin=0;clearHint();$('victory').classList.remove('show');
   document.querySelectorAll('.level').forEach(b=>{b.classList.toggle('active',b.dataset.level===name);b.setAttribute('aria-pressed',String(b.dataset.level===name));});
-  $('size-label').textContent=all.length+' ô';$('piece-count').textContent=pieces.length+' mảnh';
+  $('piece-count').textContent=pieces.length+' mảnh';
   resizeBoard();render();
 }
 function resizeBoard(){
