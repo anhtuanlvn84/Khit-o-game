@@ -18,7 +18,7 @@
     *{box-sizing:border-box} html,body{min-height:100%;margin:0}
     body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--text);background:radial-gradient(ellipse at 10% 0%,#1b3151 0,transparent 42%),radial-gradient(ellipse at 95% 20%,#202047 0,transparent 38%),var(--bg);line-height:1.45}
     button{font:inherit;cursor:pointer} button:focus-visible{outline:3px solid #8ff9df;outline-offset:3px}
-    .app{max-width:1310px;padding:34px 26px 44px;margin:0 auto}
+    .app{touch-action:manipulation;max-width:1310px;padding:34px 26px 44px;margin:0 auto}
     .top{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-bottom:31px}
     .brand{display:flex;align-items:center;gap:16px}.logo{width:57px;height:57px;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:3px;transform:rotate(-9deg);flex:none}.logo i{border-radius:4px;background:#69e7cd;box-shadow:0 4px 15px #5ae5c52f}.logo i:nth-child(2),.logo i:nth-child(6){background:#ffb76a}.logo i:nth-child(5){background:#7973ed}.logo i:nth-child(7){visibility:hidden}
     .overline{font-weight:750;font-size:11px;color:var(--accent);letter-spacing:2px;text-transform:uppercase}.top h1{margin:2px 0 3px;font-size:clamp(28px,3vw,39px);line-height:1.13;letter-spacing:-1.5px}.top p{margin:0;color:var(--muted);font-size:14px}
@@ -154,6 +154,33 @@ body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none} input
 
 const $=id=>document.getElementById(id);
 const rand=n=>Math.floor(Math.random()*n);
+
+// Suppress browser double-tap zoom without synthesizing taps or interrupting game pointer handlers.
+function installGameTapGuard(root){
+  let touch=null,lastTap=null;
+  root.addEventListener('touchstart',event=>{
+    if(event.touches.length!==1){touch=null;lastTap=null;return;}
+    const point=event.touches[0];
+    touch={id:point.identifier,x:point.clientX,y:point.clientY,time:performance.now(),moved:false};
+  },{capture:true,passive:true});
+  root.addEventListener('touchmove',event=>{
+    if(!touch)return;
+    if(event.touches.length!==1){touch=null;lastTap=null;return;}
+    const point=event.touches[0];
+    if(Math.hypot(point.clientX-touch.x,point.clientY-touch.y)>10)touch.moved=true;
+  },{capture:true,passive:true});
+  root.addEventListener('touchend',event=>{
+    const started=touch;touch=null;
+    if(!started||started.moved||event.touches.length){lastTap=null;return;}
+    const point=Array.from(event.changedTouches).find(point=>point.identifier===started.id),now=performance.now();
+    if(!point||now-started.time>350||Math.hypot(point.clientX-started.x,point.clientY-started.y)>10){lastTap=null;return;}
+    if(lastTap&&now-lastTap.time<=350&&Math.hypot(point.clientX-lastTap.x,point.clientY-lastTap.y)<=32&&event.cancelable)event.preventDefault();
+    lastTap={time:now,x:point.clientX,y:point.clientY};
+  },{capture:true,passive:false});
+  root.addEventListener('touchcancel',()=>{touch=null;lastTap=null;},{capture:true,passive:true});
+  root.addEventListener('dblclick',event=>{if(event.cancelable)event.preventDefault();},{capture:true,passive:false});
+}
+for(const id of ['preset-game','custom-game'])installGameTapGuard($(id));
 
 function openGameDatabase(name,storeName){
   return new Promise((resolve,reject)=>{
@@ -658,7 +685,25 @@ function translated(p,anchor){return shape(p).map(g=>{let v=g.v.map(([x,y])=>[x+
 function matches(a,b){return a.v.every(v=>b.v.some(w=>Math.hypot(v[0]-w[0],v[1]-w[1])<.001));}
 function fit(p,anchor){let used=new Set(parts.filter(q=>q!==p&&q.at).flatMap(q=>q.at.ids)), ids=[];for(let g of translated(p,anchor)){let t=grid.find(t=>selected.has(t.id)&&!used.has(t.id)&&Math.hypot(t.c[0]-g.c[0],t.c[1]-g.c[1])<.001&&matches(g,t));if(!t)return null;ids.push(t.id);}return ids;}
 function snapshot(){history.push(parts.map(p=>({rot:p.rot,flip:p.flip,at:p.at?{anchor:[...p.at.anchor],ids:[...p.at.ids]}:null})));}
-function start(){stopDrag();$c('delete').disabled=true;$c('library').hidden=true;started=0;finished=false;winTime=0;$c('victory').classList.remove('show');$c('wrap').classList.add('playing');$c('title').textContent=$c('name').value.trim()||'Hình tự tạo';let n=Number($c('number').value);parts=(choices.get(n)||[]).map((g,i)=>({id:i,cells:[...g].map(id=>grid.find(t=>t.id===id)),rot:rand(kind==='square'?4:6),flip:Math.random()<.5,at:null}));active=parts[0];history=[];hint=null;document.querySelector('.custom-editor-controls').hidden=true;$c('editor').hidden=true;$c('game').hidden=false;render();msg('Kéo mảnh vào bảng hoặc chọn mảnh rồi chạm vị trí.');updateSessionButtons();}
+function shuffledDifferent(items){
+  const result=shuffle([...items]);
+  if(result.length>1&&result.every((item,index)=>item===items[index]))result.push(result.shift());
+  return result;
+}
+function start(){
+  stopDrag();$c('delete').disabled=true;$c('library').hidden=true;started=0;finished=false;winTime=0;
+  $c('victory').classList.remove('show');$c('wrap').classList.add('playing');$c('title').textContent=$c('name').value.trim()||'Hình tự tạo';
+  const count=Number($c('number').value),groups=choices.get(count)||[];
+  const order=photoMode?shuffledDifferent(groups.map((_,index)=>index)):groups.map((_,index)=>index);
+  const numbers=photoMode?shuffledDifferent(groups.map((_,index)=>index+1)):groups.map((_,index)=>index+1);
+  // Display labels are independent of both solution positions and internal array IDs.
+  if(photoMode&&numbers.length>2&&numbers.every((number,index)=>number===order[index]+1))numbers.push(numbers.shift());
+  parts=order.map((source,index)=>({id:index,number:numbers[index],cells:[...groups[source]].map(id=>grid.find(cell=>cell.id===id)),rot:rand(kind==='square'?4:6),flip:Math.random()<.5,at:null}));
+  active=parts[0];history=[];hint=null;document.querySelector('.custom-editor-controls').hidden=true;$c('editor').hidden=true;$c('game').hidden=false;
+  render();msg('Kéo mảnh vào bảng hoặc chọn mảnh rồi chạm vị trí.');updateSessionButtons();
+}
+function pieceNumber(piece){return piece.number??piece.id+1;}
+
 function prepareChoices(preferred=null){
   choices=new Map();const total=selected.size;$c('number').disabled=false;
   if(photoMode){choices=photoMode.pieceStyle==='jigsaw'?new Map([[total,grid.map(cell=>new Set([cell.id]))]]):photoPartitions(photoMode.cols,photoMode.rows);let counts=[...choices.keys()];fillPieceCounts($c('number'),counts,choices.has(preferred)?preferred:counts[0]);$c('number').disabled=photoMode.pieceStyle==='jigsaw';return;}
@@ -699,12 +744,12 @@ function renderBoard(preview=null){
 function renderTray(){
   const tray=$c('tray');tray.replaceChildren();
   for(const piece of parts){
-    const card=createPieceCard({id:piece.id,number:piece.id+1,selected:piece===active,placed:piece.at,dataKey:'piece',cellCount:piece.cells.length});
+    const card=createPieceCard({id:piece.id,number:pieceNumber(piece),selected:piece===active,placed:piece.at,dataKey:'piece',cellCount:piece.cells.length});
     const picture=svg('svg',{viewBox:box(shape(piece)).join(' ')});appendPieceGraphic(picture,piece);card.append(picture);
     if(!photoMode){tray.append(card);continue;}
     const wrapper=document.createElement('div'),eye=document.createElement('button');
     wrapper.className='photo-card-wrap';eye.type='button';eye.className='photo-piece-eye';
-    eye.title='Xem mảnh #'+String(piece.id+1).padStart(2,'0');eye.setAttribute('aria-label',eye.title);
+    eye.title='Xem mảnh #'+String(pieceNumber(piece)).padStart(2,'0');eye.setAttribute('aria-label',eye.title);
     eye.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>';
     eye.addEventListener('pointerdown',event=>event.stopPropagation());
     eye.addEventListener('click',event=>{event.stopPropagation();customGestures.cancel();showPhotoPiece(piece);});
@@ -1029,7 +1074,7 @@ function appendPhotoPiece(target,piece,interactive=false){
 }
 function showPhotoPiece(piece){
   if(!photoMode||!parts.includes(piece))return;
-  const label='Xem mảnh #'+String(piece.id+1).padStart(2,'0'),bounds=box(shape(piece),photoMode.jigsaw ? .3 : 0),ratio=bounds[2]/bounds[3];
+  const label='Xem mảnh #'+String(pieceNumber(piece)).padStart(2,'0'),bounds=box(shape(piece),photoMode.jigsaw ? .3 : 0),ratio=bounds[2]/bounds[3];
   const picture=svg('svg',{viewBox:bounds.join(' '),role:'img','aria-label':label});
   picture.style.cssText='display:block;width:min(80vw, '+(70*ratio)+'vh, 720px);height:auto;max-height:70vh;margin:auto';
   appendPhotoPiece(picture,piece);showImageDialog(picture,label);
@@ -1042,7 +1087,7 @@ refreshPhotos().catch(()=>{});
 
 function captureCustomSession(){
   return {
-    kind,current,name:$c('name').value,selected:[...selected],parts:parts.map(piece=>({id:piece.id,cells:piece.cells.map(cell=>cell.id),rot:piece.rot,flip:piece.flip,at:piece.at?structuredClone(piece.at):null})),
+    kind,current,name:$c('name').value,selected:[...selected],parts:parts.map(piece=>({id:piece.id,number:pieceNumber(piece),cells:piece.cells.map(cell=>cell.id),rot:piece.rot,flip:piece.flip,at:piece.at?structuredClone(piece.at):null})),
     activeId:active?.id??null,history:structuredClone(history),choices:[...choices].map(([count,groups])=>[count,groups.map(group=>[...group])]),
     elapsed:finished?winTime:customElapsed(),hasStarted:!!started,finished,
     photo:photoMode?{...photoMode,tiles:[...photoMode.tiles]}:null
