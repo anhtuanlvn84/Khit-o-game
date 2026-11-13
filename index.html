@@ -11,6 +11,8 @@
 
 
 <style>
+.session-controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:14px}.session-controls .action{padding:9px 12px}.session-controls button:disabled{opacity:.45;cursor:not-allowed}
+
 
     :root{--bg:#0d1424;--card:#172239;--card2:#1c2a43;--text:#f6f8fd;--muted:#a2b0c6;--border:#31415f;--accent:#67e8cc;--bad:#ff7e94;--cell:38px;--shadow:0 24px 80px rgba(0,0,0,.18)}
     *{box-sizing:border-box} html,body{min-height:100%;margin:0}
@@ -115,13 +117,14 @@ body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none} input
     </div>
     <div class="header-actions"><button type="button" class="action" id="records-open">🏆 Kỷ lục</button><span class="status" title="Chạy hoàn toàn offline">CHƠI OFFLINE</span></div>
   </header>
+  <div class="session-controls" aria-label="Lưu và tiếp tục màn chơi"><button type="button" class="action" id="session-save">💾 Lưu màn</button><button type="button" class="action" id="session-resume" disabled>▶ Chơi tiếp màn đã lưu</button><span id="session-status" class="panel-note" role="status"></span></div>
   <nav class="levelbar shape-nav" aria-label="Chọn hình để xếp">
     <select class="shape-select" id="preset-select" aria-label="Hình có sẵn">
       <option value="">Chọn hình</option><option value="cross">✚ Dấu cộng · Dễ</option><option value="house">⌂ Ngôi nhà · Vừa</option><option value="heart">♥ Trái tim · Vừa</option><option value="rocket">🚀 Tên lửa · Khó</option><option value="tree">♣ Cây thông · Khó</option>
     </select>
     <select class="shape-select" id="saved-select" aria-label="Hình tự tạo"><option value="">Hình tự tạo</option></select>
     <button class="level" id="custom-open">＋ Tự tạo hình</button>
-  </nav><div class="custom-controls" style="margin:0 0 12px"><select id="photo-play-list" class="shape-select" aria-label="Chọn ảnh để chơi"><option value="">Chọn ảnh để chơi</option></select><button class="action" id="photo-open">▧ Quản lý ảnh</button></div><section id="photo-panel" class="custom-wrap" hidden><h2 id="photo-title">Quản lý ảnh</h2><div id="photo-manage" class="custom-controls"><input id="photo-file" type="file" accept="image/*" hidden><select id="photo-list" class="shape-select" aria-label="Ảnh đã lưu"><option value="">Danh sách ảnh đã lưu</option></select><button class="action" id="photo-upload">Tải ảnh</button><button class="action" id="photo-delete" disabled>Xóa ảnh</button></div><div id="photo-manage-preview" hidden><p class="panel-note" id="photo-crop-help">Kéo trên ảnh để chọn phần muốn giữ, hoặc kéo các góc khung. Thả tay để cắt.</p><div class="photo-crop-wrap"><div id="photo-crop-stage"><img id="photo-manage-image" alt="Ảnh đã chọn" draggable="false"><div id="photo-crop-box" hidden><span data-crop-corner="nw"></span><span data-crop-corner="ne"></span><span data-crop-corner="sw"></span><span data-crop-corner="se"></span></div></div></div><div class="custom-controls"><button class="action" id="photo-crop-reset" type="button">↶ Khôi phục ảnh trước khi cắt</button><span id="photo-crop-size" class="panel-note" role="status"></span></div><div class="custom-controls"><label for="photo-name">Tên ảnh</label><input id="photo-name" type="text" maxlength="80" placeholder="Nhập tên ảnh" style="flex:1;min-width:120px"><button class="action primary" id="photo-save-name">Lưu</button></div></div><div id="photo-config" hidden><img id="photo-preview" alt="Ảnh gốc" style="display:block;max-width:100%;max-height:240px;margin:12px auto;border-radius:10px"><p id="photo-size" class="custom-msg"></p><div class="custom-controls"><label for="photo-grid">Kích thước lưới</label><select id="photo-grid"></select><label for="photo-count">Số mảnh</label><select id="photo-count"></select><button class="action primary" id="photo-play">Bắt đầu chơi</button></div></div><p id="photo-msg" class="custom-msg" role="status"></p></section>
+  </nav><div class="custom-controls" style="margin:0 0 12px"><select id="photo-play-list" class="shape-select" aria-label="Chọn ảnh để chơi"><option value="">Chọn ảnh để chơi</option></select><button class="action" id="photo-open">▧ Quản lý ảnh</button></div><section id="photo-panel" class="custom-wrap" hidden><h2 id="photo-title">Quản lý ảnh</h2><div id="photo-manage" class="custom-controls"><input id="photo-file" type="file" accept="image/*" hidden><select id="photo-list" class="shape-select" aria-label="Ảnh đã lưu"><option value="">Danh sách ảnh đã lưu</option></select><button class="action" id="photo-upload">Tải ảnh</button><button class="action" id="photo-delete" disabled>Xóa ảnh</button></div><div id="photo-manage-preview" hidden><p class="panel-note" id="photo-crop-help">Kéo trên ảnh để chọn phần muốn giữ, hoặc kéo các góc khung. Thả tay để cắt.</p><div class="photo-crop-wrap"><div id="photo-crop-stage"><img id="photo-manage-image" alt="Ảnh đã chọn" draggable="false"><div id="photo-crop-box" hidden><span data-crop-corner="nw"></span><span data-crop-corner="ne"></span><span data-crop-corner="sw"></span><span data-crop-corner="se"></span></div></div></div><div class="custom-controls"><button class="action" id="photo-crop-reset" type="button">↶ Khôi phục ảnh trước khi cắt</button><span id="photo-crop-size" class="panel-note" role="status"></span></div><div class="custom-controls"><label for="photo-name">Tên ảnh</label><input id="photo-name" type="text" maxlength="80" placeholder="Nhập tên ảnh" style="flex:1;min-width:120px"><button class="action primary" id="photo-save-name">Lưu</button></div></div><div id="photo-config" hidden><img id="photo-preview" alt="Ảnh gốc" style="display:block;max-width:100%;max-height:240px;margin:12px auto;border-radius:10px"><p id="photo-size" class="custom-msg"></p><div class="custom-controls"><label for="photo-grid">Kích thước lưới</label><select id="photo-grid"></select><label for="photo-piece-style">Kiểu mảnh</label><select id="photo-piece-style"><option value="polyomino">Mảnh ô đa dạng</option><option value="jigsaw">Tranh ghép có răng khớp</option></select><label for="photo-count">Số mảnh</label><select id="photo-count"></select><button class="action primary" id="photo-play">Bắt đầu chơi</button><p id="photo-piece-note" class="panel-note" style="flex-basis:100%" hidden></p></div></div><p id="photo-msg" class="custom-msg" role="status"></p></section>
 
 <section id="custom-wrap" class="custom-wrap" hidden>
 <h2 id="custom-title">Tự tạo hình</h2><div id="custom-library" class="custom-controls custom-library"><select class="shape-select" id="custom-edit-select" aria-label="Chọn hình để chỉnh sửa"><option value="">Danh sách hình tự tạo</option></select><button type="button" class="action" id="custom-delete" disabled>Xóa hình</button></div><div class="custom-controls custom-editor-controls"><select id="custom-kind" aria-label="Loại ô"><option value="square">Hình vuông</option><option value="triangle">Tam giác</option><option value="hex">Lục giác</option></select><input id="custom-name" placeholder="Tên hình" maxlength="60"><button class="action primary" id="custom-save">Lưu hình</button><button class="action" id="custom-clear" type="button">Xóa tất cả ô</button></div>
@@ -152,6 +155,49 @@ body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none} input
 const $=id=>document.getElementById(id);
 const rand=n=>Math.floor(Math.random()*n);
 
+function openGameDatabase(name,storeName){
+  return new Promise((resolve,reject)=>{
+    try{const request=indexedDB.open(name,1);request.onupgradeneeded=()=>request.result.createObjectStore(storeName,{keyPath:'id'});request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error);}catch(error){reject(error);}
+  });
+}
+async function withGameStore(database,storeName,mode,operation){
+  const db=await database;
+  return new Promise((resolve,reject)=>{
+    const transaction=db.transaction(storeName,mode),request=operation(transaction.objectStore(storeName));
+    transaction.oncomplete=()=>resolve(request.result);transaction.onerror=()=>reject(transaction.error);transaction.onabort=()=>reject(transaction.error);
+  });
+}
+const sessionEngines=new Map(),sessionDB=openGameDatabase('khit-o-sessions-v1','sessions');sessionDB.catch(()=>{});
+let sessionBusy=false,hasSavedSession=false;
+function activeSessionEngine(){return [...sessionEngines].find(([,engine])=>engine.visible());}
+function updateSessionButtons(){
+  $('session-save').disabled=sessionBusy||!activeSessionEngine();$('session-resume').disabled=sessionBusy||!hasSavedSession;
+}
+function sessionStatus(text){$('session-status').textContent=text;}
+$('session-save').onclick=async()=>{
+  const active=activeSessionEngine();if(sessionBusy||!active)return;
+  const [engine,adapter]=active,state=structuredClone(adapter.capture());
+  sessionBusy=true;updateSessionButtons();
+  try{
+    await withGameStore(sessionDB,'sessions','readwrite',store=>store.put({id:'current',schema:1,engine,state,savedAt:Date.now()}));
+    hasSavedSession=true;sessionStatus('Đã lưu màn. Bạn có thể đóng trang và chơi tiếp sau.');
+  }catch(error){sessionStatus('Không thể lưu màn. Hãy kiểm tra dung lượng lưu trữ của trình duyệt.');}
+  finally{sessionBusy=false;updateSessionButtons();}
+};
+$('session-resume').onclick=async()=>{
+  if(sessionBusy)return;sessionBusy=true;updateSessionButtons();
+  try{
+    const saved=await withGameStore(sessionDB,'sessions','readonly',store=>store.get('current'));
+    const adapter=saved&&sessionEngines.get(saved.engine);
+    if(saved?.schema!==1||!adapter)throw Error('Không có màn đã lưu hợp lệ.');
+    await adapter.restore(saved.state);sessionStatus('Đã mở lại màn đã lưu.');
+  }catch(error){sessionStatus('Không thể mở màn đã lưu trên trình duyệt này.');}
+  finally{sessionBusy=false;updateSessionButtons();}
+};
+async function checkSavedSession(){
+  try{const saved=await withGameStore(sessionDB,'sessions','readonly',store=>store.get('current'));hasSavedSession=saved?.schema===1;if(hasSavedSession)sessionStatus('Có màn đã lưu để chơi tiếp.');}catch(error){}
+  updateSessionButtons();
+}
 function fillSelect(menu,items,{placeholder=null,value=item=>item.id,label=item=>item.name,selected=menu.value}={}){
   const options=items.map(item=>new Option(label(item),String(value(item))));
   if(placeholder!==null)options.unshift(new Option(placeholder,''));
@@ -554,6 +600,15 @@ window.addEventListener('keydown',e=>{if(document.getElementById('preset-game').
 window.addEventListener('resize',()=>{if($('board-stage').clientWidth){resizeBoard();render();}});
 // Recalculate when the board becomes visible or its container changes width.
 if(typeof ResizeObserver!=='undefined'){let lastWidth=0;new ResizeObserver(()=>{const width=$('board-stage').clientWidth;if(!width){lastWidth=0;return;}if(width!==lastWidth){lastWidth=width;resizeBoard();}}).observe($('board-stage'));}
+function capturePresetSession(){
+  return {level,chosenCount,pieces:structuredClone(pieces),selectedId,history:structuredClone(history),elapsed:gameFinished?elapsedAtWin:elapsed(),hasStarted:!!gameStarted,finished:gameFinished,choices:[...partitionChoices]};
+}
+function restorePresetSession(state){
+  startLevel(state.level,state.chosenCount);
+  partitionChoices=new Map(state.choices);pieces=state.pieces;chosenCount=state.chosenCount;selectedId=state.selectedId;history=state.history||[];
+  gameFinished=state.finished;elapsedAtWin=state.elapsed;gameStarted=state.hasStarted?performance.now()-state.elapsed*1000:0;
+  fillPieceCounts($('piece-number'),[...partitionChoices.keys()].sort((a,b)=>a-b),chosenCount);clearHint();resizeBoard();render();
+}
 startLevel('cross');
 </script>
 <script>
@@ -587,7 +642,7 @@ function library(){
   syncEditorMenu();
 }
 function persist(next){try{localStorage.setItem(store,JSON.stringify(next));saved=next;return true;}catch(e){msg('Không thể lưu trên trình duyệt này.');return false;}}
-function edit(){stopDrag();drawing=null;$c('library').hidden=false;syncEditorMenu();$c('wrap').classList.remove('playing');$c('victory').classList.remove('show');$c('title').textContent='Tự tạo hình';document.querySelector('.custom-editor-controls').hidden=false;$c('editor').hidden=false;$c('game').hidden=true;paint();}
+function edit(){stopDrag();drawing=null;$c('library').hidden=false;syncEditorMenu();$c('wrap').classList.remove('playing');$c('victory').classList.remove('show');$c('title').textContent='Tự tạo hình';document.querySelector('.custom-editor-controls').hidden=false;$c('editor').hidden=false;$c('game').hidden=true;paint();updateSessionButtons();}
 function fresh(){current=null;selected.clear();$c('name').value='';makeGrid();edit();msg('');}
 $c('kind').onchange=()=>{if(selected.size&&!confirm('Đổi loại ô sẽ xóa bản vẽ hiện tại. Tiếp tục?')){$c('kind').value=kind;return;}kind=$c('kind').value;drawing=null;selected.clear();makeGrid();edit();msg('');};
 $c('save').onclick=()=>{let name=$c('name').value.trim();if(!name){msg('Vui lòng nhập tên hình.');$c('name').focus();return;}if(!selected.size)return msg('Vui lòng vẽ hình trước khi lưu.');if(!connected())return msg('Cần ít nhất 2 ô nối liền bằng cạnh.');let id=current||String(Date.now()),s={id,name,kind,ids:[...selected]};const old=saved.find(x=>x.id===id);if(persist(current?saved.map(x=>x.id===id?s:x):[...saved,s])){if(old&&(old.kind!==kind||old.ids.length!==s.ids.length||old.ids.some(x=>!selected.has(x)))){removeRecords('custom',id);try{localStorage.removeItem('khit-o-best-custom-'+id);}catch(e){}}library();kind='square';$c('kind').value=kind;fresh();savedMenu.value='';msg('Đã lưu hình '+name+'. Chọn trong danh sách Hình tự tạo để chơi.');}};
@@ -603,10 +658,10 @@ function translated(p,anchor){return shape(p).map(g=>{let v=g.v.map(([x,y])=>[x+
 function matches(a,b){return a.v.every(v=>b.v.some(w=>Math.hypot(v[0]-w[0],v[1]-w[1])<.001));}
 function fit(p,anchor){let used=new Set(parts.filter(q=>q!==p&&q.at).flatMap(q=>q.at.ids)), ids=[];for(let g of translated(p,anchor)){let t=grid.find(t=>selected.has(t.id)&&!used.has(t.id)&&Math.hypot(t.c[0]-g.c[0],t.c[1]-g.c[1])<.001&&matches(g,t));if(!t)return null;ids.push(t.id);}return ids;}
 function snapshot(){history.push(parts.map(p=>({rot:p.rot,flip:p.flip,at:p.at?{anchor:[...p.at.anchor],ids:[...p.at.ids]}:null})));}
-function start(){stopDrag();$c('delete').disabled=true;$c('library').hidden=true;started=0;finished=false;winTime=0;$c('victory').classList.remove('show');$c('wrap').classList.add('playing');$c('title').textContent=$c('name').value.trim()||'Hình tự tạo';let n=Number($c('number').value);parts=(choices.get(n)||[]).map((g,i)=>({id:i,cells:[...g].map(id=>grid.find(t=>t.id===id)),rot:rand(kind==='square'?4:6),flip:Math.random()<.5,at:null}));active=parts[0];history=[];hint=null;document.querySelector('.custom-editor-controls').hidden=true;$c('editor').hidden=true;$c('game').hidden=false;render();msg('Kéo mảnh vào bảng hoặc chọn mảnh rồi chạm vị trí.');}
+function start(){stopDrag();$c('delete').disabled=true;$c('library').hidden=true;started=0;finished=false;winTime=0;$c('victory').classList.remove('show');$c('wrap').classList.add('playing');$c('title').textContent=$c('name').value.trim()||'Hình tự tạo';let n=Number($c('number').value);parts=(choices.get(n)||[]).map((g,i)=>({id:i,cells:[...g].map(id=>grid.find(t=>t.id===id)),rot:rand(kind==='square'?4:6),flip:Math.random()<.5,at:null}));active=parts[0];history=[];hint=null;document.querySelector('.custom-editor-controls').hidden=true;$c('editor').hidden=true;$c('game').hidden=false;render();msg('Kéo mảnh vào bảng hoặc chọn mảnh rồi chạm vị trí.');updateSessionButtons();}
 function prepareChoices(preferred=null){
-  choices=new Map();const total=selected.size;
-  if(photoMode){choices=photoPartitions(photoMode.cols,photoMode.rows);let counts=[...choices.keys()];fillPieceCounts($c('number'),counts,choices.has(preferred)?preferred:counts[0]);return;}
+  choices=new Map();const total=selected.size;$c('number').disabled=false;
+  if(photoMode){choices=photoMode.pieceStyle==='jigsaw'?new Map([[total,grid.map(cell=>new Set([cell.id]))]]):photoPartitions(photoMode.cols,photoMode.rows);let counts=[...choices.keys()];fillPieceCounts($c('number'),counts,choices.has(preferred)?preferred:counts[0]);$c('number').disabled=photoMode.pieceStyle==='jigsaw';return;}
   // Only offer counts with a concrete connected partition satisfying the size rule.
   let max=Math.min(24,Math.floor(total/4));while(max>=2&&6*Math.ceil(max/2)+2*Math.floor(max/2)>total)max--;
   for(let n=2;n<=max;n++)for(let attempt=0;attempt<10;attempt++){
@@ -621,7 +676,26 @@ function playSaved(){if(!connected())return msg('Cần ít nhất 2 ô nối li�
 function appendPieceGraphic(target,p){if(photoMode)appendPhotoPiece(target,p);else for(const cell of shape(p))target.append(poly(cell,color(p.id)));}
 function photoPieceCorrect(p){return p.at&&p.rot===0&&!p.flip&&p.at.ids.every((id,i)=>id===p.cells[i].id);}
 function photoComplete(){return parts.every(photoPieceCorrect);}
-function renderBoard(preview=null){let s=$c('board'),cells=grid.filter(g=>selected.has(g.id));s.setAttribute('viewBox',box(cells).join(' '));s.replaceChildren(...cells.map(g=>poly(g,'#34445e')));for(let p of parts)if(p.at&&!(drag?.ghost&&drag.p===p))for(let id of p.at.ids){let g=grid.find(t=>t.id===id);if(photoMode){if(id===p.at.ids[0]){let group=svg('g',{transform:`translate(${p.at.anchor[0]} ${p.at.anchor[1]})`});appendPhotoPiece(group,p);s.append(group);}let hit=poly(g,'transparent');hit.dataset.piece=p.id;hit.style.stroke='#ffffff35';s.append(hit);}else{let el=poly(g,color(p.id));el.dataset.piece=p.id;s.append(el);}}if(hint)for(let g of hint.cells){let el=poly(g,'#f3dc6c88');el.style.pointerEvents='none';s.append(el);}if(preview)for(let id of preview){let el=poly(grid.find(t=>t.id===id),'#67e8cc88');el.style.pointerEvents='none';s.append(el);}}
+function renderBoard(preview=null){
+  const board=$c('board'),cells=grid.filter(cell=>selected.has(cell.id));
+  board.setAttribute('viewBox',box(cells).join(' '));
+  board.replaceChildren(...cells.map(cell=>photoMode?.jigsaw?photoCellOutline(cell,'#34445e'):poly(cell,'#34445e')));
+  for(const piece of parts){
+    if(!piece.at||(drag?.ghost&&drag.p===piece))continue;
+    if(photoMode){
+      const group=svg('g',{transform:`translate(${piece.at.anchor[0]} ${piece.at.anchor[1]})`});
+      appendPhotoPiece(group,piece,!!photoMode.jigsaw);board.append(group);
+      if(photoMode.jigsaw)continue;
+    }
+    for(const id of piece.at.ids){
+      const cell=grid.find(cell=>cell.id===id),hit=poly(cell,photoMode?'transparent':color(piece.id));
+      hit.dataset.piece=piece.id;if(photoMode)hit.style.stroke='#ffffff35';board.append(hit);
+    }
+  }
+  for(const [highlight,fill] of [[hint?.cells,'#f3dc6c88'],[preview?.map(id=>grid.find(cell=>cell.id===id)),'#67e8cc88']]){
+    for(const cell of highlight||[]){const outline=photoMode?.jigsaw?photoCellOutline(cell,fill):poly(cell,fill);outline.style.pointerEvents='none';board.append(outline);}
+  }
+}
 function renderTray(){
   const tray=$c('tray');tray.replaceChildren();
   for(const piece of parts){
@@ -644,7 +718,7 @@ function render(){
   if(photoMode)$('photo-status').textContent=full&&!correct?'Đã lấp kín bảng nhưng ảnh chưa đúng. Hãy sắp xếp lại các mảnh.':'';
   if(full&&correct&&!finished){
     finished=true;khitSound('win');winTime=customElapsed();
-    showVictory('custom-',{type:photoMode?'photo':'custom',id:photoMode?photoMode.id+'|'+photoMode.cols+'×'+photoMode.rows:current,count:parts.length,time:winTime});
+    showVictory('custom-',{type:photoMode?'photo':'custom',id:photoMode?photoMode.id+'|'+photoMode.cols+'×'+photoMode.rows+(photoMode.pieceStyle==='jigsaw'?' · Tranh ghép':''):current,count:parts.length,time:winTime});
     $c('undo').disabled=true;
   }
 }
@@ -667,7 +741,7 @@ function anchorAt(x,y){const p=boardPointAt(x,y);return p?nearestSelectedCell(p.
 function place(p,a){if(finished)return;let ids=a&&fit(p,a);if(!ids){if(p.at)active=parts.find(q=>!q.at)||null;msg('Vị trí chưa khớp. Thử xoay hoặc lật mảnh.');render();return;}snapshot();if(!started)started=performance.now();p.at={anchor:a,ids};active=parts.find(q=>!q.at)||null;hint=null;msg('');if(active||photoMode&&!photoComplete())khitSound('place');render();}
 function stopDrag(){if(frame)cancelAnimationFrame(frame);frame=0;const d=drag;drag=null;clearTimeout(d?.hold);if(d?.ghost)d.ghost.remove();if(d?.capture?.hasPointerCapture(d.id))d.capture.releasePointerCapture(d.id);}
 function dragAnchor(d,x,y){const p=boardPointAt(x,y);return p?nearestSelectedCell(p.x-d.ox,p.y-d.oy):null;}
-function ghostMove(){if(!drag?.ghost)return;let m=$c('board').getScreenCTM(),scale=m?Math.hypot(m.a,m.b):30;let cells=shape(drag.p),b=box(cells,0);let s=drag.ghost;s.setAttribute('viewBox',b.join(' '));s.style.width=b[2]*scale+'px';s.style.height=b[3]*scale+'px';s.style.left=drag.x+(b[0]-drag.ox)*scale+'px';s.style.top=drag.y+(b[1]-drag.oy)*scale+'px';let a=dragAnchor(drag,drag.x,drag.y);renderBoard(a&&fit(drag.p,a));}
+function ghostMove(){if(!drag?.ghost)return;let m=$c('board').getScreenCTM(),scale=m?Math.hypot(m.a,m.b):30;let cells=shape(drag.p),b=box(cells,photoMode?.jigsaw ? .3 : 0);let s=drag.ghost;s.setAttribute('viewBox',b.join(' '));s.style.width=b[2]*scale+'px';s.style.height=b[3]*scale+'px';s.style.left=drag.x+(b[0]-drag.ox)*scale+'px';s.style.top=drag.y+(b[1]-drag.oy)*scale+'px';let a=dragAnchor(drag,drag.x,drag.y);renderBoard(a&&fit(drag.p,a));}
 function tick(){if(!drag?.ghost)return;let edge=85,h=window.innerHeight,y=drag.y,v=y<edge?-Math.ceil((edge-y)/5):y>h-edge?Math.ceil((y-h+edge)/5):0;if(v){window.scrollBy(0,v);ghostMove();}frame=requestAnimationFrame(tick);}
 function customTransform(p,k){if(finished||!parts.includes(p))return;active=p;let r=p.rot,f=p.flip,turns=kind==='square'?4:6;snapshot();if(k==='rotate')p.rot=(r+1)%turns;else{p.rot=(turns-r)%turns;p.flip=!f;}if(p.at){let ids=fit(p,p.at.anchor);if(!ids){p.rot=r;p.flip=f;history.pop();msg('Không đủ chỗ để xoay/lật.');return;}p.at={anchor:p.at.anchor,ids};}hint=null;render();}
 const customGestures=makePieceGestures(customTransform,(p,b)=>{if(!parts.includes(p)||$c('wrap').hidden||$c('game').hidden||finished)return;if(b&&p.at){snapshot();p.at=null;hint=null;}active=p;render();});
@@ -681,7 +755,7 @@ window.addEventListener('pointerup',e=>{if(drag?.id!==e.pointerId)return;let d=d
 window.addEventListener('pointercancel',e=>{if(drag?.id===e.pointerId){stopDrag();active=parts.find(p=>!p.at)||null;render();}});window.addEventListener('blur',()=>{if(drag){stopDrag();active=parts.find(p=>!p.at)||null;render();}});
 $c('rotate').onclick=()=>{if(active)customTransform(active,'rotate');};$c('flip').onclick=()=>{if(active)customTransform(active,'flip');};$c('undo').onclick=()=>{let s=history.pop();if(s){parts.forEach((p,i)=>Object.assign(p,s[i]));active=parts.find(p=>!p.at);hint=null;render();}};
 $c('hint').onclick=()=>{let p=active||parts.find(p=>!p.at)||(photoMode&&!finished?parts.find(p=>!photoPieceCorrect(p)):null);if(p){hint=p;renderBoard();msg(photoMode?'Vùng vàng là vị trí đúng. Xoay và lật để ảnh đúng chiều.':'Vùng vàng là vị trí gốc của mảnh. Nếu bị che, hãy lấy mảnh đang chiếm chỗ ra.');}};
-$c('reset').onclick=()=>confirmNewSet(()=>{customGestures.cancel();started=0;finished=false;winTime=0;$c('victory').classList.remove('show');parts.forEach(p=>p.at=null);history=[];active=parts[0];hint=null;render();msg('Đã làm trống bảng.');},'Bạn có muốn chơi lại từ đầu không?',!finished&&!!(started||history.length));$c('regenerate').onclick=()=>confirmNewSet(()=>{let n=Number($c('number').value),old=choices.get(n);prepareChoices(n);if(old&&!choices.has(n)){choices.set(n,old);$c('number').append(new Option(n+' mảnh',n));$c('number').value=n;}start();showToast('Đã tạo bộ mảnh mới!');},undefined,!finished&&!!(started||history.length));$c('number').onchange=start;
+$c('reset').onclick=()=>confirmNewSet(()=>{customGestures.cancel();started=0;finished=false;winTime=0;$c('victory').classList.remove('show');parts.forEach(p=>p.at=null);history=[];active=parts[0];hint=null;render();msg('Đã làm trống bảng.');},'Bạn có muốn chơi lại từ đầu không?',!finished&&!!(started||history.length));$c('regenerate').onclick=()=>confirmNewSet(()=>{let n=Number($c('number').value),old=choices.get(n);if(photoMode?.jigsaw)photoMode.jigsaw=createJigsawEdges(photoMode.cols,photoMode.rows);prepareChoices(n);if(old&&!choices.has(n)){choices.set(n,old);$c('number').append(new Option(n+' mảnh',n));$c('number').value=n;}start();showToast('Đã tạo bộ mảnh mới!');},undefined,!finished&&!!(started||history.length));$c('number').onchange=start;
 const original=document.getElementById('preset-game'),foot=document.querySelector('.foot'),preset=document.getElementById('preset-select'),savedMenu=document.getElementById('saved-select'),createButton=document.getElementById('custom-open');
 function resetGameMenus(keep=null){
   for(const menu of [preset,savedMenu,$('photo-play-list')]){
@@ -696,6 +770,7 @@ function setGameView(view){
   original.hidden=!isPreset;original.style.display=isPreset?'':'none';foot.style.display=isPreset?'':'none';
   $c('wrap').hidden=view!=='custom';photoPanel.hidden=view!=='photo';
   if(view!=='custom')$('photo-game-tools').hidden=true;
+  updateSessionButtons();
 }
 function showCustom(menu=null){setGameView('custom');resetGameMenus(menu);}
 function showOriginal(name){
@@ -721,8 +796,8 @@ window.addEventListener('keydown',e=>{if($c('wrap').hidden||$c('game').hidden||f
 const photoPanel=$('photo-panel');
 let photos=[],chosenPhoto=null,photoBusy=false,photoManaging=true;
 let photoCropOriginal=null,photoCropDrag=null;
-const photoDB=new Promise((resolve,reject)=>{try{const r=indexedDB.open('khit-o-photos-v1',1);r.onupgradeneeded=()=>r.result.createObjectStore('photos',{keyPath:'id'});r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);}catch(e){reject(e);}});photoDB.catch(()=>{});
-async function photoTx(mode,fn){const db=await photoDB;return new Promise((resolve,reject)=>{const t=db.transaction('photos',mode),r=fn(t.objectStore('photos'));t.oncomplete=()=>resolve(r.result);t.onerror=()=>reject(t.error);t.onabort=()=>reject(t.error);});}
+const photoDB=openGameDatabase('khit-o-photos-v1','photos');photoDB.catch(()=>{});
+function photoTx(mode,operation){return withGameStore(photoDB,'photos',mode,operation);}
 function photoMsg(t){$('photo-msg').textContent=t;}
 async function refreshPhotos(){
   photos=await photoTx('readonly',store=>store.getAll());
@@ -759,9 +834,14 @@ function photoPartitions(cols,rows){
   return new Map([...out].filter(([n])=>n>=2).sort((a,b)=>a[0]-b[0]));
 }
 function updatePhotoCounts(){
-  const [cols,rows]=$('photo-grid').value.split('x').map(Number),counts=Array.from({length:cols*rows-1},(_,i)=>i+2);
-  fillPieceCounts($('photo-count'),counts,counts[Math.min(counts.length-1,Math.max(0,Math.round(cols*rows/6)-2))]);
+  const [cols,rows]=$('photo-grid').value.split('x').map(Number),jigsaw=$('photo-piece-style').value==='jigsaw';
+  const counts=jigsaw?[cols*rows]:Array.from({length:cols*rows-1},(_,i)=>i+2);
+  fillPieceCounts($('photo-count'),counts,jigsaw?cols*rows:counts[Math.min(counts.length-1,Math.max(0,Math.round(cols*rows/6)-2))]);
+  $('photo-count').disabled=photoBusy||jigsaw;
+  $('photo-piece-note').hidden=!jigsaw;
+  $('photo-piece-note').textContent=jigsaw?'Mỗi ô là một mảnh có răng khớp. Đổi kích thước lưới để đổi số mảnh.':'';
 }
+$('photo-piece-style').onchange=updatePhotoCounts;
 function choosePhoto(photo){
   photoCropDrag=null;photoCropOriginal=photo?{...photo}:null;chosenPhoto=photo||null;
   $('photo-delete').disabled=!photo||photoBusy;$('photo-manage-preview').hidden=!photoManaging||!photo;
@@ -835,8 +915,9 @@ $('photo-open').onclick=()=>{resetGameMenus();openPhoto(true);choosePhoto(null);
 $('photo-list').onchange=()=>{choosePhoto(photos.find(p=>p.id===$('photo-list').value));photoMsg('');};$('photo-grid').onchange=updatePhotoCounts;
 function setPhotoBusy(busy){
   photoBusy=busy;
-  for(const id of ['file','upload','save-name','delete','list','play','play-list','open','back','crop-reset','grid','count','name'])$('photo-'+id).disabled=busy;
+  for(const id of ['file','upload','save-name','delete','list','play','play-list','open','back','crop-reset','grid','count','piece-style','name'])$('photo-'+id).disabled=busy;
   for(const menu of [preset,savedMenu,createButton])menu.disabled=busy;
+  $('photo-count').disabled=busy||$('photo-piece-style').value==='jigsaw';
   $('photo-delete').disabled=busy||!chosenPhoto;
   $('photo-crop-reset').disabled=busy||!photoCropOriginal||!chosenPhoto||photoCropOriginal.data===chosenPhoto.data;
 }
@@ -874,31 +955,81 @@ $('photo-delete').onclick=()=>{
     writeRecords(readRecords().filter(record=>record.type!=='photo'||!record.id.startsWith(photo.id+'|')));photoMsg('Đã xóa ảnh.');
   },'Không thể xóa ảnh hoặc cập nhật danh sách.');
 };
-async function buildPhotoGame(photo,cols,rows){
+async function buildPhotoGame(photo,cols,rows,pieceStyle='polyomino'){
   const image=await loadImage(photo.data),unit=Math.max(1,Math.floor(Math.min(image.width/cols,image.height/rows)));
   const width=Math.min(image.width,image.height*cols/rows),height=width*rows/cols;
   const canvas=cropToCanvas(image,{x:(image.width-width)/2,y:(image.height-height)/2,width,height},cols*unit,rows*unit),tiles=new Map();
-  for(let y=0;y<rows;y++)for(let x=0;x<cols;x++){
+  if(pieceStyle!=='jigsaw')for(let y=0;y<rows;y++)for(let x=0;x<cols;x++){
     const tile=cropToCanvas(canvas,{x:x*unit,y:y*unit,width:unit,height:unit});tiles.set(key(x,y),tile.toDataURL('image/jpeg',.9));
   }
-  return {...photo,cols,rows,tiles,reference:canvas.toDataURL('image/jpeg',.9)};
+  return {...photo,cols,rows,tiles,pieceStyle,jigsaw:pieceStyle==='jigsaw'?createJigsawEdges(cols,rows):null,reference:canvas.toDataURL('image/jpeg',.9)};
 }
 $('photo-play').onclick=()=>{
   if(!chosenPhoto||photoBusy)return;
-  const photo=chosenPhoto,[cols,rows]=$('photo-grid').value.split('x').map(Number),count=Number($('photo-count').value);
+  const photo=chosenPhoto,[cols,rows]=$('photo-grid').value.split('x').map(Number),count=Number($('photo-count').value),pieceStyle=$('photo-piece-style').value;
   return runPhotoAction(async()=>{
-    photoMode=await buildPhotoGame(photo,cols,rows);kind='square';current=null;makeGrid();selected=new Set(grid.map(cell=>cell.id));
+    photoMode=await buildPhotoGame(photo,cols,rows,pieceStyle);kind='square';current=null;makeGrid();selected=new Set(grid.map(cell=>cell.id));
     $c('name').value=photo.name;showCustom($('photo-play-list'));$('photo-game-tools').hidden=false;$('photo-play-list').value=photo.id;prepareChoices(count);start();
   },'Không thể tạo màn chơi từ ảnh này.');
 };
-function appendPhotoCell(target,cell){
+let photoClipSerial=0;
+function createJigsawEdges(cols,rows){
+  // Without replacement: every seam gets a distinct depth, even if random repeats.
+  // Five decimal SVG precision preserves these distinct depths for every supported grid.
+  const count=(cols-1)*rows+(rows-1)*cols,depths=shuffle(Array.from({length:5501},(_,i)=>(16000+i)/100000));
+  if(count>depths.length)throw Error('Lưới vượt giới hạn tạo răng khớp riêng biệt.');
+  let serial=0;
+  const edge=()=>({shapeId:++serial,sign:Math.random()<.5?-1:1,center:.43+Math.random()*.14,neck:.035+Math.random()*.02,radius:.10+Math.random()*.035,depth:depths[serial-1]});
+  const result={
+    horizontal:Array.from({length:rows+1},(_,y)=>Array.from({length:cols},()=>y===0||y===rows?null:edge())),
+    vertical:Array.from({length:rows},()=>Array.from({length:cols+1},(_,x)=>x===0||x===cols?null:edge()))
+  };
+  // A piece's set of uniquely shaped seams remains unique under rotation and reflection.
+  const seen=new Set();
+  for(let y=0;y<rows;y++)for(let x=0;x<cols;x++){
+    const signature=[result.horizontal[y][x],result.vertical[y][x+1],result.horizontal[y+1][x],result.vertical[y][x]].filter(Boolean).map(edge=>edge.shapeId).sort((a,b)=>a-b).join(',');
+    if(seen.has(signature))throw Error('Lưới không hỗ trợ các mảnh có hình dạng riêng biệt.');
+    seen.add(signature);
+  }
+  return result;
+}
+function jigsawEdgeCommands(x,y,dx,dy,edge,reverse=false){
+  const point=(t,n=0)=>(x+dx*t+dy*n).toFixed(5)+' '+(y+dy*t-dx*n).toFixed(5);
+  if(!edge)return 'L '+point(1);
+  const c=reverse?1-edge.center:edge.center,n=edge.neck,r=edge.radius,d=edge.depth*edge.sign*(reverse?-1:1);
+  return 'L '+point(c-n)+' C '+point(c-n*.35)+' '+point(c-r,d*.25)+' '+point(c-r,d*.65)+
+    ' C '+point(c-r,d*1.15)+' '+point(c+r,d*1.15)+' '+point(c+r,d*.65)+
+    ' C '+point(c+r,d*.25)+' '+point(c+n*.35)+' '+point(c+n)+' L '+point(1);
+}
+function jigsawPath(cell){
+  const x=cell.c[0]-.5,y=cell.c[1]-.5,{horizontal:h,vertical:v}=photoMode.jigsaw;
+  return 'M '+x+' '+y+' '+jigsawEdgeCommands(x,y,1,0,h[y][x])+' '+
+    jigsawEdgeCommands(x+1,y,0,1,v[y][x+1])+' '+jigsawEdgeCommands(x+1,y+1,-1,0,h[y+1][x],true)+' '+
+    jigsawEdgeCommands(x,y+1,0,-1,v[y][x],true)+' Z';
+}
+function photoCellOutline(cell,fill){
+  return photoMode?.jigsaw?svg('path',{d:jigsawPath(cell),fill,stroke:'#ffffff60','stroke-width':.025,'stroke-linejoin':'round'}):poly(cell,fill);
+}
+function appendPhotoCell(target,cell,piece,interactive=false){
+  if(photoMode.jigsaw){
+    const id='photo-clip-'+(++photoClipSerial),defs=svg('defs'),clip=svg('clipPath',{id,clipPathUnits:'userSpaceOnUse'});
+    clip.append(svg('path',{d:jigsawPath(cell)}));defs.append(clip);target.append(defs);
+    const image=svg('image',{x:0,y:0,width:photoMode.cols,height:photoMode.rows,href:photoMode.reference,preserveAspectRatio:'none','clip-path':'url(#'+id+')'});
+    image.style.pointerEvents='none';target.append(image);
+    const outline=photoCellOutline(cell,'transparent');
+    if(interactive){outline.dataset.piece=piece.id;outline.style.cursor='grab';}else outline.style.pointerEvents='none';
+    target.append(outline);return;
+  }
   const image=svg('image',{x:cell.c[0]-.5,y:cell.c[1]-.5,width:1,height:1,href:photoMode.tiles.get(cell.id),preserveAspectRatio:'none'});
   image.style.pointerEvents='none';target.append(image);
 }
-function appendPhotoPiece(s,p){let a=p.cells[0].c,group=svg('g',{transform:`rotate(${p.rot*90}) scale(${p.flip?-1:1} 1) translate(${-a[0]} ${-a[1]})`});for(let g of p.cells)appendPhotoCell(group,g);s.append(group);}
+function appendPhotoPiece(target,piece,interactive=false){
+  const anchor=piece.cells[0].c,group=svg('g',{transform:`rotate(${piece.rot*90}) scale(${piece.flip?-1:1} 1) translate(${-anchor[0]} ${-anchor[1]})`});
+  for(const cell of piece.cells)appendPhotoCell(group,cell,piece,interactive);target.append(group);
+}
 function showPhotoPiece(piece){
   if(!photoMode||!parts.includes(piece))return;
-  const label='Xem mảnh #'+String(piece.id+1).padStart(2,'0'),bounds=box(shape(piece),0),ratio=bounds[2]/bounds[3];
+  const label='Xem mảnh #'+String(piece.id+1).padStart(2,'0'),bounds=box(shape(piece),photoMode.jigsaw ? .3 : 0),ratio=bounds[2]/bounds[3];
   const picture=svg('svg',{viewBox:bounds.join(' '),role:'img','aria-label':label});
   picture.style.cssText='display:block;width:min(80vw, '+(70*ratio)+'vh, 720px);height:auto;max-height:70vh;margin:auto';
   appendPhotoPiece(picture,piece);showImageDialog(picture,label);
@@ -909,6 +1040,39 @@ $('photo-reference').onclick=()=>{
 };
 refreshPhotos().catch(()=>{});
 
+function captureCustomSession(){
+  return {
+    kind,current,name:$c('name').value,selected:[...selected],parts:parts.map(piece=>({id:piece.id,cells:piece.cells.map(cell=>cell.id),rot:piece.rot,flip:piece.flip,at:piece.at?structuredClone(piece.at):null})),
+    activeId:active?.id??null,history:structuredClone(history),choices:[...choices].map(([count,groups])=>[count,groups.map(group=>[...group])]),
+    elapsed:finished?winTime:customElapsed(),hasStarted:!!started,finished,
+    photo:photoMode?{...photoMode,tiles:[...photoMode.tiles]}:null
+  };
+}
+async function restoreCustomSession(state){
+  stopDrag();photoMode=state.photo?{...state.photo,tiles:new Map(state.photo.tiles)}:null;
+  kind=state.kind;current=state.current;makeGrid();selected=new Set(state.selected);
+  parts=state.parts.map(piece=>({...piece,cells:piece.cells.map(id=>grid.find(cell=>cell.id===id))}));
+  if(parts.some(piece=>piece.cells.some(cell=>!cell)))throw Error('Màn đã lưu không hợp lệ.');
+  active=parts.find(piece=>piece.id===state.activeId)||null;history=state.history||[];hint=null;
+  choices=new Map(state.choices.map(([count,groups])=>[count,groups.map(group=>new Set(group))]));
+  $c('name').value=state.name;showCustom();$c('wrap').classList.add('playing');$c('title').textContent=state.name;
+  $c('library').hidden=true;document.querySelector('.custom-editor-controls').hidden=true;$c('editor').hidden=true;$c('game').hidden=false;
+  fillPieceCounts($c('number'),[...choices.keys()],parts.length);$c('number').disabled=!!photoMode?.jigsaw;
+  $('photo-game-tools').hidden=!photoMode;
+  if(photoMode){
+    chosenPhoto=photos.find(photo=>photo.id===photoMode.id)||{id:photoMode.id,name:photoMode.name,data:photoMode.data,w:photoMode.w,h:photoMode.h};
+    if(![...$('photo-play-list').options].some(option=>option.value===photoMode.id))$('photo-play-list').append(new Option(photoMode.name,photoMode.id));
+    $('photo-play-list').value=photoMode.id;$('photo-piece-style').value=photoMode.pieceStyle||'polyomino';
+  }else{
+    library();if(![...savedMenu.options].some(option=>option.value===current))savedMenu.append(new Option(state.name,current));
+    savedMenu.value=current;savedMenu.classList.add('active');
+  }
+  finished=state.finished;winTime=state.elapsed;started=state.hasStarted?performance.now()-state.elapsed*1000:0;
+  render();updateSessionButtons();
+}
+sessionEngines.set('preset',{visible:()=>!original.hidden,capture:capturePresetSession,restore:state=>{showOriginal(state.level);restorePresetSession(state);}});
+sessionEngines.set('custom',{visible:()=>!$c('wrap').hidden&&!$c('game').hidden,capture:captureCustomSession,restore:restoreCustomSession});
+checkSavedSession();
 preset.value=level;preset.classList.add('active');
 makeGrid();library();paint();
 })();
