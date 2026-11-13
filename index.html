@@ -155,32 +155,10 @@ body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none} input
 const $=id=>document.getElementById(id);
 const rand=n=>Math.floor(Math.random()*n);
 
-// Suppress browser double-tap zoom without synthesizing taps or interrupting game pointer handlers.
-function installGameTapGuard(root){
-  let touch=null,lastTap=null;
-  root.addEventListener('touchstart',event=>{
-    if(event.touches.length!==1){touch=null;lastTap=null;return;}
-    const point=event.touches[0];
-    touch={id:point.identifier,x:point.clientX,y:point.clientY,time:performance.now(),moved:false};
-  },{capture:true,passive:true});
-  root.addEventListener('touchmove',event=>{
-    if(!touch)return;
-    if(event.touches.length!==1){touch=null;lastTap=null;return;}
-    const point=event.touches[0];
-    if(Math.hypot(point.clientX-touch.x,point.clientY-touch.y)>10)touch.moved=true;
-  },{capture:true,passive:true});
-  root.addEventListener('touchend',event=>{
-    const started=touch;touch=null;
-    if(!started||started.moved||event.touches.length){lastTap=null;return;}
-    const point=Array.from(event.changedTouches).find(point=>point.identifier===started.id),now=performance.now();
-    if(!point||now-started.time>350||Math.hypot(point.clientX-started.x,point.clientY-started.y)>10){lastTap=null;return;}
-    if(lastTap&&now-lastTap.time<=350&&Math.hypot(point.clientX-lastTap.x,point.clientY-lastTap.y)<=32&&event.cancelable)event.preventDefault();
-    lastTap={time:now,x:point.clientX,y:point.clientY};
-  },{capture:true,passive:false});
-  root.addEventListener('touchcancel',()=>{touch=null;lastTap=null;},{capture:true,passive:true});
-  root.addEventListener('dblclick',event=>{if(event.cancelable)event.preventDefault();},{capture:true,passive:false});
-}
-for(const id of ['preset-game','custom-game'])installGameTapGuard($(id));
+// CSS touch-action blocks double-tap zoom. Do not cancel touchend: game input uses Pointer Events.
+for(const id of ['preset-game','custom-game'])$(id).addEventListener('dblclick',event=>{
+  if(event.cancelable)event.preventDefault();
+},{capture:true,passive:false});
 
 function openGameDatabase(name,storeName){
   return new Promise((resolve,reject)=>{
@@ -562,14 +540,37 @@ function dragAutoScrollTick(){
 function startDragAutoScroll(){
   if(!dragScrollFrame)dragScrollFrame=requestAnimationFrame(dragAutoScrollTick);
 }
-function makePieceGestures(transform, single){let pending=null;return {cancel(){if(pending)clearTimeout(pending.timer);pending=null;},tap(p,board){if(pending&&pending.p===p&&pending.board===board){this.cancel();transform(p,'rotate');return;}if(pending){let old=pending;this.cancel();if(old.board)single(old.p,true);}if(!board)single(p,false);pending={p,board,timer:setTimeout(()=>{pending=null;if(board)single(p,true);},300)};}};}
+function makePieceGestures(transform,single){
+  let pending=null;
+  return {
+    cancel(){if(pending)clearTimeout(pending.timer);pending=null;},
+    begin(piece,board,pointerType='mouse'){
+      if(pointerType!=='mouse'&&pending&&pending.p===piece&&pending.board===board&&performance.now()<=pending.expires){
+        // Touch rotation happens on the second contact, before waiting for finger release.
+        this.cancel();transform(piece,'rotate');return true;
+      }
+      return false;
+    },
+    tap(piece,board,pointerType='mouse'){
+      const now=performance.now(),delay=pointerType==='mouse'?300:450;
+      if(pending&&pending.p===piece&&pending.board===board&&now<=pending.expires){
+        this.cancel();transform(piece,'rotate');return;
+      }
+      if(pending){const old=pending;this.cancel();if(old.board)single(old.p,true);}
+      if(!board)single(piece,false);
+      pending={p:piece,board,expires:performance.now()+delay,timer:setTimeout(()=>{pending=null;if(board)single(piece,true);},delay)};
+    }
+  };
+}
+const dragThreshold=pointerType=>pointerType==='mouse'?7:14;
+
 const presetGestures=makePieceGestures((p,k)=>{selectedId=p.id;rotateOrFlip(k);},(p,b)=>{if(!document.getElementById('preset-game').hidden&&pieces.includes(p))selectPiece(p.id);});
 function presetContext(e){let el=e.target.closest('.piece-card,.placed-piece');if(!el)return;e.preventDefault();if(gameFinished||drag)return;let p=pieces.find(p=>p.id===Number(el.dataset.id));if(p){presetGestures.cancel();selectedId=p.id;rotateOrFlip('flip');}}
 $('piece-grid').addEventListener('contextmenu',presetContext);elBoard.addEventListener('contextmenu',presetContext);
 function traySwipe(d,e,tray,sx,sy){
   if(!tray||e.pointerType==='mouse'||d.fromBoard||d.empty||d.held||d.ghost||d.moved)return false;
   const dx=e.clientX-sx,dy=e.clientY-sy;
-  if(!d.scrolling&&tray.scrollHeight>tray.clientHeight+1&&Math.abs(dy)>8&&Math.abs(dy)>Math.abs(dx)*1.35){d.scrolling=true;clearTimeout(d.hold);d.scrollY=sy;}
+  if(!d.scrolling&&tray.scrollHeight>tray.clientHeight+1&&Math.abs(dy)>dragThreshold(e.pointerType)&&Math.abs(dy)>Math.abs(dx)*1.35){d.scrolling=true;clearTimeout(d.hold);d.scrollY=sy;}
   if(!d.scrolling)return false;
   tray.scrollTop+=d.scrollY-e.clientY;d.scrollY=e.clientY;return true;
 }
@@ -577,8 +578,8 @@ function onPointerDown(e){
   if(gameFinished||drag||(e.pointerType==='mouse'&&e.button!==0))return;
   const pieceCard=e.target.closest('.piece-card');const placedPiece=e.target.closest('.placed-piece');if(!pieceCard&&!placedPiece)return;
   const p=pieces.find(p=>p.id===Number((pieceCard||placedPiece).dataset.id));if(!p||(pieceCard&&p.placement))return;
-  if(e.cancelable)e.preventDefault();selectedId=p.id;drag={id:p.id,x:e.clientX,y:e.clientY,lastX:e.clientX,lastY:e.clientY,pointerType:e.pointerType,moved:false,fromBoard:!!placedPiece,ghost:null};
-  drag.pointerId=e.pointerId;if(e.pointerType!=='mouse'){let d=drag;d.hold=setTimeout(()=>{if(drag===d&&!d.moved&&!d.scrolling){presetGestures.cancel();d.held=true;rotateOrFlip('flip');}},500);}
+  const rotatedOnPress=presetGestures.begin(p,!!placedPiece,e.pointerType);if(e.cancelable)e.preventDefault();selectedId=p.id;drag={id:p.id,x:e.clientX,y:e.clientY,lastX:e.clientX,lastY:e.clientY,pointerType:e.pointerType,rotatedOnPress,moved:false,fromBoard:!!placedPiece,ghost:null};
+  drag.pointerId=e.pointerId;if(e.pointerType!=='mouse'&&!rotatedOnPress){let d=drag;d.hold=setTimeout(()=>{if(drag===d&&!d.moved&&!d.scrolling){presetGestures.cancel();d.held=true;rotateOrFlip('flip');}},500);}
   // Không dựng lại DOM ngay trong pointerdown: giữ nguyên đối tượng cho thao tác cảm ứng.
 }
 function onPointerMove(e){
@@ -586,14 +587,14 @@ function onPointerMove(e){
   const p=pieces.find(p=>p.id===drag.id);if(!p)return;
   drag.lastX=e.clientX;drag.lastY=e.clientY;
   if(traySwipe(drag,e,elGrid.closest('.piece-scroll'),drag.x,drag.y)){presetGestures.cancel();return;}
-  if(!drag.moved&&Math.hypot(e.clientX-drag.x,e.clientY-drag.y)>7){clearTimeout(drag.hold);presetGestures.cancel();drag.moved=true;drag.ghost=createGhost(p);}
+  if(!drag.moved&&Math.hypot(e.clientX-drag.x,e.clientY-drag.y)>dragThreshold(e.pointerType)){clearTimeout(drag.hold);presetGestures.cancel();drag.moved=true;drag.ghost=createGhost(p);}
   if(drag.moved){moveGhost(e.clientX,e.clientY);hoverPos=nearBoard(e.clientX,e.clientY)?getAnchor(e.clientX,e.clientY,p):null;renderPreview();startDragAutoScroll();}
 }
 function onPointerUp(e){
   if(!drag||drag.pointerId!==e.pointerId)return;stopDragAutoScroll();const was=drag;clearTimeout(was.hold);drag=null;was.ghost?.remove();const p=pieces.find(p=>p.id===was.id);
   if(!p)return;
   ignoreBoardClickUntil=Date.now()+350;
-  if(was.held||was.scrolling)return;if(!was.moved){presetGestures.tap(p,was.fromBoard);return;}
+  if(was.held||was.scrolling)return;if(!was.moved){if(was.rotatedOnPress)return;presetGestures.tap(p,was.fromBoard,was.pointerType);return;}
   const near=nearBoard(e.clientX,e.clientY);const anchor=near?getAnchor(e.clientX,e.clientY,p):null;
   hoverPos=null;
   if(anchor&&check(p,anchor.x,anchor.y))place(p,anchor.x,anchor.y);
@@ -792,12 +793,12 @@ function customTransform(p,k){if(finished||!parts.includes(p))return;active=p;le
 const customGestures=makePieceGestures(customTransform,(p,b)=>{if(!parts.includes(p)||$c('wrap').hidden||$c('game').hidden||finished)return;if(b&&p.at){snapshot();p.at=null;hint=null;}active=p;render();});
 function customContext(e){let el=e.target.closest('[data-piece]');if(!el)return;e.preventDefault();if(drag||finished)return;let p=parts[Number(el.dataset.piece)];if(p){customGestures.cancel();customTransform(p,'flip');}}
 $c('tray').addEventListener('contextmenu',customContext);$c('board').addEventListener('contextmenu',customContext);
-function beginCustomDrag(e,p,fromBoard){if(finished||drag||e.button>0)return;e.preventDefault();let ox=0,oy=0;if(fromBoard){let pt=getPoint($c('board'),e.clientX,e.clientY);if(!pt)return;ox=pt.x-p.at.anchor[0];oy=pt.y-p.at.anchor[1];}active=p;drag={p,id:e.pointerId,x:e.clientX,y:e.clientY,sx:e.clientX,sy:e.clientY,ghost:null,fromBoard,ox,oy,capture:e.currentTarget};e.currentTarget.setPointerCapture(e.pointerId);if(e.pointerType!=='mouse'){let d=drag;d.hold=setTimeout(()=>{if(drag===d&&!d.ghost&&!d.scrolling){if(photoMode&&!started)started=performance.now();customGestures.cancel();d.held=true;customTransform(p,'flip');}},500);}}
+function beginCustomDrag(e,p,fromBoard){if(finished||drag||e.button>0)return;const rotatedOnPress=customGestures.begin(p,fromBoard,e.pointerType);e.preventDefault();let ox=0,oy=0;if(fromBoard){let pt=getPoint($c('board'),e.clientX,e.clientY);if(!pt)return;ox=pt.x-p.at.anchor[0];oy=pt.y-p.at.anchor[1];}active=p;drag={p,id:e.pointerId,pointerType:e.pointerType,rotatedOnPress,x:e.clientX,y:e.clientY,sx:e.clientX,sy:e.clientY,ghost:null,fromBoard,ox,oy,capture:e.currentTarget};e.currentTarget.setPointerCapture(e.pointerId);if(e.pointerType!=='mouse'&&!rotatedOnPress){let d=drag;d.hold=setTimeout(()=>{if(drag===d&&!d.ghost&&!d.scrolling){if(photoMode&&!started)started=performance.now();customGestures.cancel();d.held=true;customTransform(p,'flip');}},500);}}
 $c('tray').addEventListener('pointerdown',e=>{let b=e.target.closest('[data-piece]');if(!b||b.disabled)return;let p=parts[Number(b.dataset.piece)];if(p)beginCustomDrag(e,p,false);});
 $c('board').addEventListener('pointerdown',e=>{if(finished||drag||e.button>0)return;let id=e.target.dataset.piece;if(id!==undefined){let p=parts[Number(id)];if(p?.at)beginCustomDrag(e,p,true);return;}if(!active||active.at)return;e.preventDefault();drag={p:active,id:e.pointerId,x:e.clientX,y:e.clientY,sx:e.clientX,sy:e.clientY,empty:true,capture:e.currentTarget};e.currentTarget.setPointerCapture(e.pointerId);});
-window.addEventListener('pointermove',e=>{if(drag?.id!==e.pointerId)return;drag.x=e.clientX;drag.y=e.clientY;if(drag.empty||drag.held)return;if(traySwipe(drag,e,$c('tray').closest('.piece-scroll'),drag.sx,drag.sy)){customGestures.cancel();return;}if(!drag.ghost&&Math.hypot(drag.x-drag.sx,drag.y-drag.sy)>6){clearTimeout(drag.hold);if(photoMode&&!started)started=performance.now();customGestures.cancel();let s=svg('svg',{class:'custom-ghost'});appendPieceGraphic(s,drag.p);document.body.append(s);drag.ghost=s;frame=requestAnimationFrame(tick);}ghostMove();});
-window.addEventListener('pointerup',e=>{if(drag?.id!==e.pointerId)return;let d=drag,a=d.ghost?dragAnchor(d,e.clientX,e.clientY):null;stopDrag();if(d.held||d.scrolling)return;if(d.empty){if(Math.hypot(e.clientX-d.sx,e.clientY-d.sy)<=6)place(d.p,anchorAt(e.clientX,e.clientY));else render();return;}if(d.ghost){if(a){place(d.p,a);return;}let r=$c('board').getBoundingClientRect();let outside=e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom;if(d.fromBoard&&outside){snapshot();d.p.at=null;active=d.p;hint=null;}render();return;}if(photoMode&&!started)started=performance.now();customGestures.tap(d.p,d.fromBoard);});
-window.addEventListener('pointercancel',e=>{if(drag?.id===e.pointerId){stopDrag();active=parts.find(p=>!p.at)||null;render();}});window.addEventListener('blur',()=>{if(drag){stopDrag();active=parts.find(p=>!p.at)||null;render();}});
+window.addEventListener('pointermove',e=>{if(drag?.id!==e.pointerId)return;drag.x=e.clientX;drag.y=e.clientY;if(drag.empty||drag.held)return;if(traySwipe(drag,e,$c('tray').closest('.piece-scroll'),drag.sx,drag.sy)){customGestures.cancel();return;}if(!drag.ghost&&Math.hypot(drag.x-drag.sx,drag.y-drag.sy)>dragThreshold(e.pointerType)){clearTimeout(drag.hold);if(photoMode&&!started)started=performance.now();customGestures.cancel();let s=svg('svg',{class:'custom-ghost'});appendPieceGraphic(s,drag.p);document.body.append(s);drag.ghost=s;frame=requestAnimationFrame(tick);}ghostMove();});
+window.addEventListener('pointerup',e=>{if(drag?.id!==e.pointerId)return;let d=drag,a=d.ghost?dragAnchor(d,e.clientX,e.clientY):null;stopDrag();if(d.held||d.scrolling||(d.rotatedOnPress&&!d.ghost))return;if(d.empty){if(Math.hypot(e.clientX-d.sx,e.clientY-d.sy)<=6)place(d.p,anchorAt(e.clientX,e.clientY));else render();return;}if(d.ghost){if(a){place(d.p,a);return;}let r=$c('board').getBoundingClientRect();let outside=e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom;if(d.fromBoard&&outside){snapshot();d.p.at=null;active=d.p;hint=null;}render();return;}if(photoMode&&!started)started=performance.now();customGestures.tap(d.p,d.fromBoard,d.pointerType);});
+window.addEventListener('pointercancel',e=>{if(drag?.id===e.pointerId){customGestures.cancel();stopDrag();active=parts.find(p=>!p.at)||null;render();}});window.addEventListener('blur',()=>{customGestures.cancel();if(drag){stopDrag();active=parts.find(p=>!p.at)||null;render();}});
 $c('rotate').onclick=()=>{if(active)customTransform(active,'rotate');};$c('flip').onclick=()=>{if(active)customTransform(active,'flip');};$c('undo').onclick=()=>{let s=history.pop();if(s){parts.forEach((p,i)=>Object.assign(p,s[i]));active=parts.find(p=>!p.at);hint=null;render();}};
 $c('hint').onclick=()=>{let p=active||parts.find(p=>!p.at)||(photoMode&&!finished?parts.find(p=>!photoPieceCorrect(p)):null);if(p){hint=p;renderBoard();msg(photoMode?'Vùng vàng là vị trí đúng. Xoay và lật để ảnh đúng chiều.':'Vùng vàng là vị trí gốc của mảnh. Nếu bị che, hãy lấy mảnh đang chiếm chỗ ra.');}};
 $c('reset').onclick=()=>confirmNewSet(()=>{customGestures.cancel();started=0;finished=false;winTime=0;$c('victory').classList.remove('show');parts.forEach(p=>p.at=null);history=[];active=parts[0];hint=null;render();msg('Đã làm trống bảng.');},'Bạn có muốn chơi lại từ đầu không?',!finished&&!!(started||history.length));$c('regenerate').onclick=()=>confirmNewSet(()=>{let n=Number($c('number').value),old=choices.get(n);if(photoMode?.jigsaw)photoMode.jigsaw=createJigsawEdges(photoMode.cols,photoMode.rows);prepareChoices(n);if(old&&!choices.has(n)){choices.set(n,old);$c('number').append(new Option(n+' mảnh',n));$c('number').value=n;}start();showToast('Đã tạo bộ mảnh mới!');},undefined,!finished&&!!(started||history.length));$c('number').onchange=start;
