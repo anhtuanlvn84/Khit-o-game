@@ -106,6 +106,44 @@ body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none} input
 
 #records .modal{width:min(560px,100%);max-height:85vh;overflow:auto;text-align:left}#records table{width:100%;border-collapse:collapse;font-size:14px}#records th,#records td{padding:10px 6px;border-bottom:1px solid #405574;text-align:left;overflow-wrap:anywhere}#records th:nth-child(2),#records td:nth-child(2){text-align:center}#records th:last-child,#records td:last-child{text-align:right}#records td:last-child{color:#67e8cc;font-weight:700;white-space:nowrap}#records .modal-actions{margin-top:16px}
 #new-set-confirm::backdrop{background:#08111bdb;backdrop-filter:blur(4px)}
+
+.combo-panel{border:1px solid #405574;background:#172239;border-radius:15px;padding:12px 16px;margin:0 0 12px}
+.combo-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:9px}
+.combo-heading strong{color:#a7f7e5}.combo-heading span{font-size:12px;color:#b7cce7;overflow-wrap:anywhere}
+.combo-controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.combo-controls label{font-size:13px;color:#dbeaff}
+.combo-controls input{width:115px;max-width:30vw;padding:10px;border:1px solid #5d7897;border-radius:10px;background:#233750;color:#fff;font:inherit}
+.combo-controls .action{padding:9px 12px}.combo-controls button:disabled{opacity:.4}
+.combo-note{font-size:12px;color:#a2b0c6;margin:9px 0 0}
+@media(max-width:590px){.combo-panel{padding:11px}.combo-controls{gap:6px}.combo-controls input{width:88px}.combo-controls .action{padding:9px}}
+
+/* Hai pulldown cạnh tiêu đề Kho mảnh ghép; tự xuống hàng trên màn nhỏ. */
+.preset-pickers{display:flex;flex-wrap:wrap;justify-content:flex-end;align-items:center;gap:7px;min-width:0}
+.preset-pickers .piece-count-select{min-width:112px;max-width:160px}
+.preset-pickers .combo-select-wrap{min-width:150px;max-width:190px}
+.preset-pickers .combo-select-wrap select{font-size:13px}
+@media(max-width:590px){.preset-pickers{gap:5px;max-width:100%;}.preset-pickers .piece-count-select{min-width:98px;max-width:125px}.preset-pickers .combo-select-wrap{min-width:137px;max-width:158px}.preset-pickers .combo-select-wrap select{font-size:12px}.panel-head:has(.preset-pickers){flex-wrap:wrap}.panel-head:has(.preset-pickers) .preset-pickers{width:100%;justify-content:flex-end}}
+/* Kho mảnh: hai bộ chọn luôn nằm trên cùng một hàng. */
+#preset-game .panel-head:has(.preset-pickers){display:flex;flex-direction:column;align-items:stretch;gap:10px}
+#preset-game .preset-pickers{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:9px;width:100%;max-width:none;align-items:center}
+#preset-game .preset-pickers .piece-count-select,#preset-game .preset-pickers .combo-select-wrap{width:100%;min-width:0;max-width:none;margin:0;height:43px}
+#preset-game .preset-pickers .piece-count-select select{width:100%;min-width:0;text-overflow:ellipsis}
+@media(max-width:590px){#preset-game .preset-pickers{gap:7px}#preset-game .preset-pickers .piece-count-select,#preset-game .preset-pickers .combo-select-wrap{height:40px}}
+
+/* Nhạc nền Khít Ô: bộ phát gọn, responsive */
+.music-controls{display:flex;align-items:center;gap:7px;flex-wrap:wrap;justify-content:flex-end}
+.music-toggle{border:1px solid #47738a;background:#21374e;color:#e4fff7;border-radius:12px;min-height:38px;padding:7px 11px;font-weight:750;white-space:nowrap}
+.music-toggle[aria-pressed="true"]{background:#21554f;border-color:#67e8cc}
+.offline-music-stack{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:125px}.offline-music-stack .status{width:100%;justify-content:center}.offline-music-stack .music-controls{display:flex;flex-direction:column;align-items:center;gap:3px;width:100%;flex-wrap:nowrap}.offline-music-stack .music-toggle{width:100%;min-height:34px;padding:5px 9px}.offline-music-stack .music-track{max-width:170px;text-align:center;font-size:10px}
+.music-track{color:#a7c9db;font-size:11px;max-width:145px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media(max-width:590px){.header-actions{align-items:center}.offline-music-stack{margin-left:auto}.offline-music-stack .music-track{max-width:145px}}
+
+/* Thanh thao tác: lưu màn bên trái, nhạc / kỷ lục / offline bên phải. */
+.game-action-row{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:14px;min-width:0}
+.game-action-row .session-controls{margin-bottom:0;flex:1 1 auto;min-width:0}
+.game-action-row .header-actions{display:flex;flex:0 0 auto;align-items:center;justify-content:flex-end;gap:9px;width:auto;margin:0}
+.game-action-row .header-actions .music-toggle,.game-action-row .header-actions #records-open,.game-action-row .header-actions .status{height:40px;min-height:40px;display:inline-flex;align-items:center;justify-content:center;margin:0}
+.game-action-row .header-actions .status{min-width:0}
+@media(max-width:760px){.game-action-row{flex-wrap:wrap;align-items:flex-start}.game-action-row .session-controls{flex:1 1 100%}.game-action-row .header-actions{flex:1 1 100%;width:auto;justify-content:flex-end;gap:7px}.game-action-row .header-actions .music-toggle,.game-action-row .header-actions #records-open,.game-action-row .header-actions .status{font-size:11px;padding:7px 9px;min-width:0;white-space:nowrap}}
 </style>
 </head>
 <body>
@@ -115,9 +153,11 @@ body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none} input
       <div class="logo" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
       <div><div class="overline">Puzzle • Xếp kín hình</div><h1>Khít Ô<span style="color:#67e8cc">.</span></h1><p>Một hình lớn. Nhiều mảnh nhỏ. Không được để dư ô nào!</p></div>
     </div>
-    <div class="header-actions"><button type="button" class="action" id="records-open">🏆 Kỷ lục</button><span class="status" title="Chạy hoàn toàn offline">CHƠI OFFLINE</span></div>
   </header>
-  <div class="session-controls" aria-label="Lưu và tiếp tục màn chơi"><button type="button" class="action" id="session-save">💾 Lưu màn</button><button type="button" class="action" id="session-resume" disabled>▶ Chơi tiếp màn đã lưu</button><span id="session-status" class="panel-note" role="status"></span></div>
+  <div class="game-action-row">
+    <div class="session-controls" aria-label="Lưu và tiếp tục màn chơi"><button type="button" class="action" id="session-save">💾 Lưu màn</button><button type="button" class="action" id="session-resume" disabled>▶ Chơi tiếp màn đã lưu</button><span id="session-status" class="panel-note" role="status"></span></div>
+    <div class="header-actions"><button id="music-toggle" class="music-toggle" type="button" aria-pressed="false" title="Bật hoặc tắt nhạc nền">♫ Bật nhạc</button><span id="music-track" hidden aria-live="polite"></span><button type="button" class="action" id="records-open">🏆 Kỷ lục</button><span class="status" title="Chạy hoàn toàn offline">CHƠI OFFLINE</span></div>
+  </div>
   <nav class="levelbar shape-nav" aria-label="Chọn hình để xếp">
     <select class="shape-select" id="preset-select" aria-label="Hình có sẵn">
       <option value="">Chọn hình</option><option value="cross">✚ Dấu cộng · Dễ</option><option value="house">⌂ Ngôi nhà · Vừa</option><option value="heart">♥ Trái tim · Vừa</option><option value="rocket">🚀 Tên lửa · Khó</option><option value="tree">♣ Cây thông · Khó</option>
@@ -137,7 +177,7 @@ body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none} input
     </section>
     <aside class="panel right" aria-label="Các mảnh ghép và công cụ">
       
-      <div class="piece-scroll"><div class="piece-grid" id="piece-grid"></div></div><p class="tray-scroll-note">Vuốt dọc để xem thêm • Kéo chéo hoặc ngang trước để kéo mảnh</p><div class="panel-head"><div><h2 class="panel-title">Kho mảnh ghép</h2><p class="panel-note">Kéo mảnh vào bảng hoặc nhấp chọn rồi nhấp vị trí.</p></div><label class="piece-count-select" title="Chọn số mảnh ghép"><select id="piece-number" aria-label="Chọn số mảnh ghép"></select><span class="dropdown-triangle" aria-hidden="true"></span></label></div>
+      <div class="piece-scroll"><div class="piece-grid" id="piece-grid"></div></div><p class="tray-scroll-note">Vuốt dọc để xem thêm • Kéo chéo hoặc ngang trước để kéo mảnh</p><div class="panel-head"><div><h2 class="panel-title">Kho mảnh ghép</h2><p class="panel-note">Kéo mảnh vào bảng hoặc nhấp chọn rồi nhấp vị trí.</p></div><div class="preset-pickers"><label class="piece-count-select" title="Chọn số mảnh ghép"><select id="piece-number" aria-label="Chọn số mảnh ghép"></select><span class="dropdown-triangle" aria-hidden="true"></span></label><label class="piece-count-select combo-select-wrap" title="Chọn tổ hợp mảnh"><select id="combination-select" aria-label="Chọn tổ hợp mảnh"></select><span class="dropdown-triangle" aria-hidden="true"></span></label></div></div>
       <div class="tools"><p class="tools-title">Chạm hai lần: Xoay • Nhấn giữ / chuột phải: Lật</p><div class="tool-grid"><button class="tool" id="rotate" title="Xoay 90 độ (phím R)"><b>↻</b> <span class="tool-word">Xoay</span></button><button class="tool" id="flip" title="Lật gương (phím F)"><b>⇋</b> <span class="tool-word">Lật</span></button><button class="tool" id="undo" title="Hoàn tác lần thao tác trước"><b>↶</b> Hoàn tác</button></div><div class="action-grid"><button class="action" id="hint">✦ Gợi ý vị trí</button><button class="action" id="reset">↺ Chơi lại</button><button class="action primary" id="new" style="grid-column:1/-1">⤨ Tạo bộ mảnh mới</button></div></div>
     </aside>
   </main>
@@ -270,7 +310,7 @@ function readRecords(){try{const raw=localStorage.getItem(KHIT_RECORDS);if(raw!=
 function writeRecords(rows){recordCache=rows;try{localStorage.setItem(KHIT_RECORDS,JSON.stringify(rows));}catch(e){}}
 function saveRecord(type,id,count,time){const rows=readRecords();const old=rows.find(r=>r.type===type&&r.id===id&&r.count===count);const best=old?Math.min(old.time,time):time;if(old)old.time=best;else rows.push({type,id,count,time:best});writeRecords(rows);return best;}
 function removeRecords(type,id){writeRecords(readRecords().filter(r=>r.type!==type||r.id!==id));}
-function showRecords(){const body=document.getElementById('records-body');body.replaceChildren();let custom=[];try{custom=JSON.parse(localStorage.getItem('khit-o-custom-v1')||'[]');}catch(e){}const rows=readRecords().map(r=>({...r,name:r.type==='preset'?LEVELS[r.id]?.name:r.type==='photo'?photoRecordNames.get(r.id.split('|')[0])&&photoRecordNames.get(r.id.split('|')[0])+' · '+r.id.split('|')[1]:custom.find(x=>x.id===r.id)?.name})).filter(r=>r.name).sort((a,b)=>a.type.localeCompare(b.type)||a.name.localeCompare(b.name,'vi')||a.count-b.count);for(const r of rows){const tr=document.createElement('tr');for(const value of [r.name+(r.type==='custom'?' (tự tạo)':''),r.count,formatTime(r.time)]){const td=document.createElement('td');td.textContent=value;tr.append(td);}body.append(tr);}document.getElementById('records-empty').hidden=rows.length>0;document.getElementById('records').classList.add('show');document.getElementById('records-close').focus();}
+function showRecords(){const body=document.getElementById('records-body');body.replaceChildren();let custom=[];try{custom=JSON.parse(localStorage.getItem('khit-o-custom-v1')||'[]');}catch(e){}const rows=readRecords().map(r=>({...r,name:r.type==='preset'?(LEVELS[r.id.split('|')[0]]?.name+(r.id.includes('|')?' · Tổ hợp '+r.id.split('|')[1]:'')):r.type==='photo'?photoRecordNames.get(r.id.split('|')[0])&&photoRecordNames.get(r.id.split('|')[0])+' · '+r.id.split('|')[1]:custom.find(x=>x.id===r.id)?.name})).filter(r=>r.name).sort((a,b)=>a.type.localeCompare(b.type)||a.name.localeCompare(b.name,'vi')||a.count-b.count);for(const r of rows){const tr=document.createElement('tr');for(const value of [r.name+(r.type==='custom'?' (tự tạo)':''),r.count,formatTime(r.time)]){const td=document.createElement('td');td.textContent=value;tr.append(td);}body.append(tr);}document.getElementById('records-empty').hidden=rows.length>0;document.getElementById('records').classList.add('show');document.getElementById('records-close').focus();}
 document.getElementById('records-open').onclick=showRecords;
 document.getElementById('records-close').onclick=()=>{document.getElementById('records').classList.remove('show');document.getElementById('records-open').focus();};
 document.getElementById('records').addEventListener('click',e=>{if(e.target===e.currentTarget)document.getElementById('records-close').click();});
@@ -334,19 +374,20 @@ const neighbors=({x,y})=>[{x:x+1,y},{x:x-1,y},{x,y:y+1},{x,y:y-1}];
 function normalize(cells){const minX=Math.min(...cells.map(p=>p.x)),minY=Math.min(...cells.map(p=>p.y));return cells.map(p=>({x:p.x-minX,y:p.y-minY}));}
 function bounds(cells){return {w:Math.max(...cells.map(p=>p.x))+1,h:Math.max(...cells.map(p=>p.y))+1};}
 function transformed(piece){let cells=piece.base.map(({x,y})=>({x:piece.flip?-x:x,y}));for(let t=0;t<piece.rot;t++)cells=cells.map(({x,y})=>({x:-y,y:x}));return normalize(cells);}
-function makePartitions(all,maxSize,minSize){
+function makePartitions(all,maxSize,minSize,rng=Math.random){
+  const pickRandom=n=>Math.floor(rng()*n);
   let best=null,bestScore=Infinity;
   for(let attempt=0;attempt<125;attempt++){
     const free=new Map(all.map(p=>[key(p.x,p.y),p]));const groups=[];
     while(free.size){
-      const pick=[...free.values()][rand(free.size)];let group=[pick];free.delete(key(pick.x,pick.y));
-      const goal=Math.max(minSize,Math.min(maxSize+1,maxSize-1+rand(3)));
+      const pick=[...free.values()][pickRandom(free.size)];let group=[pick];free.delete(key(pick.x,pick.y));
+      const goal=Math.max(minSize,Math.min(maxSize+1,maxSize-1+pickRandom(3)));
       while(group.length<goal){
         const possible=new Map();
         for(const p of group)for(const n of neighbors(p))if(free.has(key(n.x,n.y)))possible.set(key(n.x,n.y),n);
         if(!possible.size)break;
         // Ưu tiên một phần các ô có ít lối thoát để tránh để lại ô đơn lẻ.
-        const options=[...possible.values()].map(p=>({...p,degree:neighbors(p).filter(n=>free.has(key(n.x,n.y))).length,noise:Math.random()*2.5}));
+        const options=[...possible.values()].map(p=>({...p,degree:neighbors(p).filter(n=>free.has(key(n.x,n.y))).length,noise:rng()*2.5}));
         options.sort((a,b)=>(a.degree+a.noise)-(b.degree+b.noise));
         const pick=options[0];group.push({x:pick.x,y:pick.y});free.delete(key(pick.x,pick.y));
       }
@@ -364,50 +405,126 @@ function makePartitions(all,maxSize,minSize){
       if(at!==-1&&closest<=maxSize+3){groups[at].push(...groups[i]);groups.splice(i,1);}
     }
     const penalty=groups.reduce((sum,g)=>sum+(g.length<minSize?100*(minSize-g.length):0)+Math.max(0,g.length-maxSize-2)*20,0);
-    const score=penalty+Math.random();
+    const score=penalty+rng();
     if(score<bestScore){bestScore=score;best=groups;}
     if(penalty===0)break;
   }
-  return shuffle(best);
+  return comboShuffle(best,rng);
 }
 // Mỗi lựa chọn lưu sẵn một cách chia thực tế: không đưa ra số mảnh
 // nếu game chưa tạo được bộ mảnh liên thông, phủ kín hình.
 function validPieceSizes(groups){return groups.length>=2 && groups.every(g=>g.length>=2) && groups.filter(g=>g.length>=6).length>=Math.ceil(groups.length/2);}
-function buildChoices(all,def){
+function buildChoices(all,def,rng=Math.random,onCandidate=null){
   const found=new Map();
   const sizes=[def.size,4,5,6,7,8,9,10,11,12];
   for(const size of sizes){
     for(let attempt=0;attempt<5;attempt++){
-      const groups=makePartitions(all,size,Math.min(def.min,Math.max(2,size-2)));
+      const groups=makePartitions(all,size,Math.min(def.min,Math.max(2,size-2)),rng);
       if(groups && validPieceSizes(groups)){
         const count=groups.length;
+        if(onCandidate)onCandidate(groups);
         if(!found.has(count))found.set(count,groups);
       }
     }
   }
   return found;
 }
-function startLevel(name,requestedCount=null,refreshChoices=false){
-  const isSameLevel=name===startLevel.lastLevel;level=name;let def=LEVELS[level];cols=Math.max(...def.mask.map(r=>r.length));rows=def.mask.length;
-  const all=[];for(let y=0;y<rows;y++)for(let x=0;x<def.mask[y].length;x++)if(def.mask[y][x]==='#')all.push({x,y});
-  maskSet=new Set(all.map(p=>key(p.x,p.y)));
-  if(refreshChoices||name!==startLevel.lastLevel||!partitionChoices.size){
-    partitionChoices=buildChoices(all,def);
-    startLevel.lastLevel=name;
-  }
-  const counts=[...partitionChoices.keys()].sort((a,b)=>a-b);
-  if(!counts.length){const fallback=[all];partitionChoices.set(fallback.length,fallback);counts.push(fallback.length);}
-  chosenCount=requestedCount!==null&&partitionChoices.has(Number(requestedCount))?Number(requestedCount):
-    (isSameLevel&&partitionChoices.has(chosenCount)?chosenCount:counts[Math.floor(counts.length/2)]);
-  fillPieceCounts($('piece-number'),counts,chosenCount);
-  const groups=partitionChoices.get(chosenCount);
-  pieces=groups.map((group,i)=>{
-    const minX=Math.min(...group.map(p=>p.x)),minY=Math.min(...group.map(p=>p.y));
-    return {id:i+1,base:group.map(({x,y})=>({x:x-minX,y:y-minY})),solution:{x:minX,y:minY},rot:rand(4),flip:Math.random()>.5,placement:null,color:PALETTE[i%PALETTE.length]};
-  });
-  pieces=shuffle(pieces);selectedId=pieces[0]?.id??null;history=[];drag=null;hoverPos=null;gameStarted=0;gameFinished=false;elapsedAtWin=0;clearHint();$('victory').classList.remove('show');
-  resizeBoard();render();
+// Dùng đúng thuật toán tạo cụm/gộp mảnh của bản v8 được chọn.
+// Mã ngẫu nhiên cố định chỉ giúp mở lại cùng tổ hợp; không ép số mảnh.
+const COMBO_VERSION=3;
+let combinationIndex=1,presetSetVersion=COMBO_VERSION;
+function seededRandom(seed){let a=seed>>>0;return ()=>{a=(a+0x6D2B79F5)>>>0;let t=a;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return ((t^(t>>>14))>>>0)/4294967296;};}
+function comboSeed(name,count,index,attempt=0){let h=2166136261;for(const ch of `KHITO-${COMBO_VERSION}|${name}|${count}|${index}|${attempt}`){h^=ch.charCodeAt(0);h=Math.imul(h,16777619);}return h>>>0;}
+function comboShuffle(items,rng){const a=[...items];for(let i=a.length-1;i>0;i--){const j=Math.floor(rng()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function comboSignature(groups){return groups.map(g=>g.map(p=>key(p.x,p.y)).sort().join(';')).sort().join('|');}
+const combinationCatalogs=new Map();
+function combinationCatalog(all,name){
+  if(combinationCatalogs.has(name))return combinationCatalogs.get(name);
+  const catalog={byCount:new Map(),seen:new Set(),round:0};
+  catalog.extend=()=>{
+    const rng=seededRandom(comboSeed(name,0,catalog.round++));
+    buildChoices(all,LEVELS[name],rng,groups=>{
+      const signature=comboSignature(groups);if(catalog.seen.has(signature))return;
+      catalog.seen.add(signature);
+      const count=groups.length;
+      if(!catalog.byCount.has(count))catalog.byCount.set(count,[]);
+      // Stable piece IDs follow board position, independent of generation order.
+      groups.sort((a,b)=>Math.min(...a.map(p=>p.y*100+p.x))-Math.min(...b.map(p=>p.y*100+p.x)));
+      catalog.byCount.get(count).push(groups);
+    });
+  };
+  catalog.ensure=(count,index)=>{
+    // Bound work per interaction; a later request continues with fresh seeds.
+    for(let batch=0;(catalog.byCount.get(count)?.length||0)<index&&batch<20;batch++)catalog.extend();
+    return (catalog.byCount.get(count)?.length||0)>=index;
+  };
+  combinationCatalogs.set(name,catalog);catalog.extend();return catalog;
 }
+function generateFixedGroups(all,name,count,index){
+  if(!Number.isSafeInteger(index)||index<1)throw Error('Số tổ hợp không hợp lệ.');
+  const catalog=combinationCatalog(all,name);
+  if(!catalog.ensure(count,index))throw Error('Chưa tìm thêm được tổ hợp hợp lệ. Bạn có thể thử lại.');
+  return catalog.byCount.get(count)[index-1];
+}
+function fixedPieceOrder(name,count,index){const rng=seededRandom(comboSeed(name,count,index,997));return rng;}
+// Chỉ hiển thị các tổ hợp đã tạo và kiểm tra, không ước lượng tổng số.
+const COMBO_PAGE=20;
+function syncComboControls(){
+  const menu=$('combination-select');if(!menu)return;
+  const catalog=combinationCatalogs.get(level),groups=catalog?.byCount.get(chosenCount)||[];
+  const options=groups.map((_,i)=>new Option('Tổ hợp '+(i+1),String(i+1)));
+  options.push(new Option('Tìm thêm tổ hợp…','more'));
+  menu.replaceChildren(...options);
+  if(presetSetVersion!==COMBO_VERSION){const saved=new Option('Tổ hợp đã lưu (bản cũ)','saved');saved.disabled=true;menu.prepend(saved);menu.value='saved';}
+  else {
+    if(!groups[combinationIndex-1])menu.prepend(new Option('Tổ hợp '+combinationIndex+' (đã lưu)',String(combinationIndex)));
+    menu.value=String(combinationIndex);
+  }
+  const counts=[...catalog.byCount.keys()];
+  if(!counts.includes(chosenCount))counts.push(chosenCount);
+  fillPieceCounts($('piece-number'),counts.sort((a,b)=>a-b),chosenCount);
+}
+function startLevel(name,requestedCount=null,refreshChoices=false,requestedIndex=null){
+  const def=LEVELS[name];if(!def)return;
+  const all=[];for(let y=0;y<def.mask.length;y++)for(let x=0;x<def.mask[y].length;x++)if(def.mask[y][x]==='#')all.push({x,y});
+  const counts=[...combinationCatalog(all,name).byCount.keys()].sort((a,b)=>a-b);
+  if(!counts.length)throw Error('Hình này chưa có bộ mảnh thỏa quy tắc.');
+  const count=counts.includes(Number(requestedCount))?Number(requestedCount):(name===level&&counts.includes(chosenCount)?chosenCount:counts[Math.floor(counts.length/2)]);
+  const index=requestedIndex===null?1:Number(requestedIndex);
+  // Chuẩn bị đề trước khi thay đổi ván đang chơi.
+  const groups=generateFixedGroups(all,name,count,index);
+  const rng=fixedPieceOrder(name,count,index);
+  const nextPieces=groups.map((group,i)=>{
+    const minX=Math.min(...group.map(p=>p.x)),minY=Math.min(...group.map(p=>p.y));
+    return {id:i+1,base:group.map(({x,y})=>({x:x-minX,y:y-minY})),solution:{x:minX,y:minY},rot:Math.floor(rng()*4),flip:rng()>.5,placement:null,color:PALETTE[i%PALETTE.length]};
+  });
+  level=name;chosenCount=count;combinationIndex=index;presetSetVersion=COMBO_VERSION;cols=Math.max(...def.mask.map(r=>r.length));rows=def.mask.length;
+  maskSet=new Set(all.map(p=>key(p.x,p.y)));partitionChoices=new Map([[count,groups]]);
+  pieces=comboShuffle(nextPieces,rng);selectedId=pieces[0]?.id??null;history=[];drag=null;hoverPos=null;gameStarted=0;gameFinished=false;elapsedAtWin=0;
+  clearHint();$('victory').classList.remove('show');fillPieceCounts($('piece-number'),counts,count);syncComboControls();resizeBoard();render();
+}
+function advanceCombination(message){
+  const index=presetSetVersion===COMBO_VERSION?combinationIndex+1:1;
+  try{startLevel(level,chosenCount,false,index);showToast(message+' '+combinationIndex);}
+  catch(error){showToast(error.message);syncComboControls();}
+}
+function openCombination(index){
+  if(!Number.isSafeInteger(index)||index<1)return;
+  const apply=()=>{try{startLevel(level,chosenCount,false,index);showToast('Đã mở Tổ hợp '+combinationIndex);}catch(error){showToast(error.message);syncComboControls();}};
+  confirmNewSet(apply,'Bạn có muốn chuyển sang tổ hợp khác không?',!gameFinished&&!!(gameStarted||history.length));
+}
+$('combination-select').addEventListener('change',e=>{
+  if(e.target.value==='more'){
+    const catalog=combinationCatalogs.get(level),before=catalog.byCount.get(chosenCount)?.length||0;
+    catalog.ensure(chosenCount,before+COMBO_PAGE);
+    syncComboControls();
+    const added=(catalog.byCount.get(chosenCount)?.length||0)-before;
+    showToast(added?'Đã tìm thêm '+added+' tổ hợp hợp lệ.':'Chưa tìm thêm được tổ hợp hợp lệ. Bạn có thể thử lại.');
+    return;
+  }
+  openCombination(Number(e.target.value));
+});
+
 function resizeBoard(){
   const stage=$('board-stage');if(!stage.clientWidth)return;let available=Math.max(260,stage.clientWidth-36);cell=Math.floor(Math.min(48,available/cols,435/rows));cell=Math.max(20,cell);
   elBoard.style.setProperty('--cell',cell+'px');elBoard.style.width=(cols*cell)+'px';elBoard.style.height=(rows*cell)+'px';
@@ -465,7 +582,7 @@ function clearHint(){clearTimeout(hintTimeout);currentHint=null;elHint.replaceCh
 function checkVictory(){
   if(pieces.some(p=>!p.placement)||occupancy().size!==maskSet.size)return;
   gameFinished=true;khitSound('win');elapsedAtWin=elapsed();
-  showVictory('',{type:'preset',id:level,count:pieces.length,time:elapsedAtWin,confetti:true});renderTray();
+  showVictory('',{type:'preset',id:level+'|'+combinationIndex+(presetSetVersion>=2?'|v'+presetSetVersion:''),count:pieces.length,time:elapsedAtWin,confetti:true});renderTray();
 }
 function place(piece,x,y){
   if(gameFinished||!piece)return false;
@@ -607,7 +724,7 @@ function onBoardClick(e){
   const p=pieces.find(p=>p.id===selectedId);if(!p||p.placement)return;
   const anchor=getAnchor(e.clientX,e.clientY,p);place(p,anchor.x,anchor.y);
 }
-$('piece-number').addEventListener('change',e=>{startLevel(level,Number(e.target.value));showToast('Đã tạo ván mới với '+chosenCount+' mảnh!');});
+$('piece-number').addEventListener('change',e=>{startLevel(level,Number(e.target.value),false,1);showToast('Đã tạo ván mới với '+chosenCount+' mảnh!');});
 $('piece-grid').addEventListener('pointerdown',onPointerDown);
 elBoard.addEventListener('pointerdown',onPointerDown);
 window.addEventListener('pointermove',onPointerMove,{passive:true});
@@ -617,9 +734,9 @@ elBoard.addEventListener('pointermove',onBoardMove);
 elBoard.addEventListener('pointerleave',()=>{if(!drag){hoverPos=null;renderPreview();}});
 elBoard.addEventListener('click',onBoardClick);
 $('rotate').addEventListener('click',()=>rotateOrFlip('rotate'));$('flip').addEventListener('click',()=>rotateOrFlip('flip'));$('undo').addEventListener('click',undo);
-$('hint').addEventListener('click',hint);$('reset').addEventListener('click',()=>confirmNewSet(reset,'Bạn có muốn chơi lại từ đầu không?',!gameFinished&&!!(gameStarted||history.length)));$('new').addEventListener('click',()=>confirmNewSet(()=>{startLevel(level,chosenCount,true);showToast('Đã tạo bộ mảnh mới, chắc chắn có lời giải!');},undefined,!gameFinished&&!!(gameStarted||history.length)));
+$('hint').addEventListener('click',hint);$('reset').addEventListener('click',()=>confirmNewSet(reset,'Bạn có muốn chơi lại từ đầu không?',!gameFinished&&!!(gameStarted||history.length)));$('new').addEventListener('click',()=>confirmNewSet(()=>{advanceCombination('Đã chuyển sang Tổ hợp');},undefined,!gameFinished&&!!(gameStarted||history.length)));
 $('victory-close').addEventListener('click',()=>$('victory').classList.remove('show'));
-$('victory-new').addEventListener('click',()=>{startLevel(level,chosenCount,true);showToast('Bắt đầu một ván mới!');});
+$('victory-new').addEventListener('click',()=>{advanceCombination('Bắt đầu Tổ hợp');});
 // Preset selection is handled after the original layout is visible (see showOriginal).
 window.addEventListener('keydown',e=>{if(document.getElementById('preset-game').hidden)return;
   if(e.altKey||e.ctrlKey||e.metaKey||e.target.closest('input,textarea,[contenteditable=true]'))return;
@@ -629,13 +746,18 @@ window.addEventListener('resize',()=>{if($('board-stage').clientWidth){resizeBoa
 // Recalculate when the board becomes visible or its container changes width.
 if(typeof ResizeObserver!=='undefined'){let lastWidth=0;new ResizeObserver(()=>{const width=$('board-stage').clientWidth;if(!width){lastWidth=0;return;}if(width!==lastWidth){lastWidth=width;resizeBoard();}}).observe($('board-stage'));}
 function capturePresetSession(){
-  return {level,chosenCount,pieces:structuredClone(pieces),selectedId,history:structuredClone(history),elapsed:gameFinished?elapsedAtWin:elapsed(),hasStarted:!!gameStarted,finished:gameFinished,choices:[...partitionChoices]};
+  return {level,chosenCount,combinationIndex,comboVersion:presetSetVersion,pieces:structuredClone(pieces),selectedId,history:structuredClone(history),elapsed:gameFinished?elapsedAtWin:elapsed(),hasStarted:!!gameStarted,finished:gameFinished,choices:[...partitionChoices]};
 }
 function restorePresetSession(state){
-  startLevel(state.level,state.chosenCount);
-  partitionChoices=new Map(state.choices);pieces=state.pieces;chosenCount=state.chosenCount;selectedId=state.selectedId;history=state.history||[];
+  // Giữ nguyên vị trí các mảnh của màn đã lưu, kể cả màn dùng bộ đề cũ.
+  startLevel(state.level,null,false,1);
+  pieces=state.pieces;chosenCount=state.chosenCount;combinationIndex=state.combinationIndex||1;presetSetVersion=state.comboVersion||1;selectedId=state.selectedId;history=state.history||[];
+  partitionChoices=new Map(state.choices||[]);
   gameFinished=state.finished;elapsedAtWin=state.elapsed;gameStarted=state.hasStarted?performance.now()-state.elapsed*1000:0;
-  fillPieceCounts($('piece-number'),[...partitionChoices.keys()].sort((a,b)=>a-b),chosenCount);clearHint();resizeBoard();render();
+  const all=[...maskSet].map(k=>{const [x,y]=k.split(',').map(Number);return {x,y};});
+  const counts=[...combinationCatalog(all,level).byCount.keys()];
+  if(!counts.includes(chosenCount))counts.push(chosenCount);
+  fillPieceCounts($('piece-number'),counts.sort((a,b)=>a-b),chosenCount);syncComboControls();clearHint();resizeBoard();render();
 }
 startLevel('cross');
 </script>
@@ -830,7 +952,7 @@ createButton.onclick=()=>{
 preset.addEventListener('change',()=>{
   const name=preset.value;
   if(!name||!LEVELS[name]){if($c('wrap').hidden)preset.value=level;return;}
-  showOriginal(name);startLevel(name,null,true);
+  showOriginal(name);startLevel(name,null,false,1);
 });
 savedMenu.addEventListener('change',()=>{
   const id=savedMenu.value;if(!id)return;
@@ -1125,5 +1247,84 @@ makeGrid();library();paint();
 </script>
 <script>document.addEventListener("contextmenu",e=>{if(!e.target.closest("input,textarea,[contenteditable=true]"))e.preventDefault();});</script><script>
 (()=>{for(const tray of document.querySelectorAll('.piece-scroll')){const note=tray.nextElementSibling;const update=()=>{if(note?.classList.contains('tray-scroll-note'))note.hidden=tray.scrollHeight<=tray.clientHeight+1;};if(typeof ResizeObserver!=='undefined')new ResizeObserver(update).observe(tray);if(typeof MutationObserver!=='undefined')new MutationObserver(update).observe(tray,{childList:true,subtree:true});update();}})();
-</script></body>
+</script>
+<script>
+/* 20 bản nhạc gốc tạo bằng Web Audio, 5 bản cho mỗi phong cách.
+   Không tải mạng, không dùng nhạc có bản quyền. */
+(()=>{
+ 'use strict';
+ const button=document.getElementById('music-toggle'),caption=document.getElementById('music-track');
+ if(!button||!caption)return;
+ const STYLES=['Piano thư giãn','Game vui nhộn','Không gian êm dịu','Retro 8-bit'];
+ const TITLES=[
+  'Nắng ban mai','Cơn mưa nhỏ','Một chiều bình yên','Mây trôi','Ánh đèn ấm',
+  'Nhảy qua ô','Kẹo sắc màu','Mèo tinh nghịch','Vòng quay vui','Đi tìm kho báu',
+  'Đêm sao','Dòng sông xanh','Giấc mơ xa','Bầu trời tĩnh lặng','Gió trên đồi',
+  'Pixel phiêu lưu','Đường hầm bí mật','Hành tinh tí hon','Chiến thắng nhỏ','Chuyến tàu 8-bit'
+ ];
+ const KEYS=[0,2,5,7,9, 0,4,7,9,2, 2,5,7,9,0, 0,2,4,7,9];
+ const BPM=[78,84,72,88,76, 126,138,120,132,144, 64,70,60,74,68, 148,156,140,164,152];
+ const PROGRESSIONS=[[0,5,3,4],[0,3,4,0],[0,4,5,3],[0,3,5,4],[0,5,4,3]];
+ const SCALE=[0,2,4,5,7,9,11,12,14,16,17,19,21];
+ let ctx=null,master=null,enabled=false,track=-1,queue=[],step=0,nextAt=0,ticker=null,epoch=0;
+ function rng(seed){let x=(seed+1)*2654435761>>>0;return ()=>{x^=x<<13;x^=x>>>17;x^=x<<5;return (x>>>0)/4294967296;};}
+ function shuffleTracks(){queue=Array.from({length:20},(_,i)=>i);for(let i=queue.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[queue[i],queue[j]]=[queue[j],queue[i]];}if(queue.length>1&&queue[0]===track)[queue[0],queue[1]]=[queue[1],queue[0]];}
+ function nextTrack(){if(!queue.length)shuffleTracks();track=queue.shift();step=0;caption.textContent=STYLES[Math.floor(track/5)]+' · '+TITLES[track];}
+ function note(freq,at,duration,type,gain,attack=.012,release=.15){
+  if(!ctx||!master)return;
+  const osc=ctx.createOscillator(),env=ctx.createGain();osc.type=type;osc.frequency.setValueAtTime(freq,at);
+  env.gain.setValueAtTime(.0001,at);env.gain.linearRampToValueAtTime(gain,at+attack);
+  env.gain.setValueAtTime(gain,Math.max(at+attack,at+duration-release));env.gain.exponentialRampToValueAtTime(.0001,at+duration);
+  osc.connect(env);env.connect(master);osc.start(at);osc.stop(at+duration+.02);
+  osc.onended=()=>{osc.disconnect();env.disconnect();};
+ }
+ function freq(midi){return 440*Math.pow(2,(midi-69)/12);}
+ function playStep(index,beat,at){
+  const style=Math.floor(index/5),variation=index%5,bar=Math.floor(beat/8),pos=beat%8;
+  const random=rng(index*1009+bar*71+pos*37),root=KEYS[index],chord=PROGRESSIONS[variation][bar%4];
+  const rootMidi=48+root+SCALE[chord],speed=60/BPM[index],dur=speed/2;
+  const motif=[0,2,4,2,5,4,2,1, 0,3,5,3,6,5,3,2, 2,4,6,4,7,6,4,3, 0,2,5,4,3,2,1,0];
+  const melody=rootMidi+12+SCALE[(motif[(pos+bar*8+variation*3)%motif.length]+Math.floor(random()*3))%SCALE.length];
+  if(style===0){
+   if(pos===0||pos===4){for(const d of [0,4,7])note(freq(rootMidi-12+d),at,Math.min(speed*2.4,1.65),'sine',.038,.025,.30);}
+   if(pos%2===0||random()>.45)note(freq(melody),at,dur*1.9,'triangle',.062,.012,.19);
+  }else if(style===1){
+   if(pos%2===0)note(freq(rootMidi-12+(pos%4===0?0:7)),at,dur*.85,'triangle',.07,.008,.07);
+   note(freq(melody+(pos===7?12:0)),at,dur*(pos%3===0?1.8:.75),'square',.024,.006,.05);
+   if(pos===0||pos===4)note(freq(rootMidi+7),at,dur*.6,'sine',.035,.005,.04);
+  }else if(style===2){
+   if(pos===0){for(const d of [0,7,12,16])note(freq(rootMidi-12+d),at,Math.min(speed*7.7,5.8),'sine',.025,.55,1.2);}
+   if(pos===2||pos===6)note(freq(melody+12),at,dur*3.1,'sine',.023,.16,.48);
+  }else{
+   note(freq(melody+(pos%4===3?12:0)),at,dur*.68,'square',.020,.004,.035);
+   if(pos%2===0)note(freq(rootMidi-12+(pos%4===0?0:7)),at,dur*.62,'triangle',.065,.004,.04);
+   if(pos===0)note(freq(rootMidi+7),at,dur*1.6,'square',.012,.005,.07);
+  }
+ }
+ function tick(){
+  if(!enabled||!ctx||ctx.state!=='running')return;
+  let guard=0;
+  while(nextAt<ctx.currentTime+.28&&guard++<24){
+   if(track<0||step>=128)nextTrack();
+   const current=track,halfBeat=30/BPM[current];
+   playStep(current,step,nextAt);step++;nextAt+=halfBeat;
+  }
+ }
+ async function turnOn(){
+  try{
+   if(!ctx){const Audio=window.AudioContext||window.webkitAudioContext;if(!Audio){caption.textContent='Trình duyệt không hỗ trợ nhạc';return;}ctx=new Audio();master=ctx.createGain();master.connect(ctx.destination);}
+   await ctx.resume();if(!enabled)return;
+   master.gain.setTargetAtTime(.084,ctx.currentTime,.05);
+   nextAt=ctx.currentTime+.06;if(track<0)nextTrack();
+   clearInterval(ticker);ticker=setInterval(tick,90);tick();
+  }catch(e){enabled=false;button.setAttribute('aria-pressed','false');button.textContent='♫ Bật nhạc';caption.textContent='Chạm để thử phát nhạc';}
+ }
+ button.addEventListener('click',()=>{
+  enabled=!enabled;button.setAttribute('aria-pressed',String(enabled));button.textContent=enabled?'♫ Tắt nhạc':'♫ Bật nhạc';
+  if(enabled)turnOn();else{clearInterval(ticker);ticker=null;if(master&&ctx)master.gain.setTargetAtTime(0,ctx.currentTime,.04);if(ctx){ctx.suspend().catch(()=>{});}track=-1;caption.textContent='20 bài • Phát ngẫu nhiên';}
+ });
+ document.addEventListener('visibilitychange',()=>{if(document.hidden){if(ctx&&enabled)ctx.suspend().catch(()=>{});}else if(enabled&&ctx){ctx.resume().then(()=>{nextAt=ctx.currentTime+.06;tick();}).catch(()=>{});}});
+})();
+</script>
+</body>
 </html>
