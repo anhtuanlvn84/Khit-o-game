@@ -270,7 +270,7 @@ function readRecords(){try{const raw=localStorage.getItem(KHIT_RECORDS);if(raw!=
 function writeRecords(rows){recordCache=rows;try{localStorage.setItem(KHIT_RECORDS,JSON.stringify(rows));}catch(e){}}
 function saveRecord(type,id,count,time){const rows=readRecords();const old=rows.find(r=>r.type===type&&r.id===id&&r.count===count);const best=old?Math.min(old.time,time):time;if(old)old.time=best;else rows.push({type,id,count,time:best});writeRecords(rows);return best;}
 function removeRecords(type,id){writeRecords(readRecords().filter(r=>r.type!==type||r.id!==id));}
-function showRecords(){const body=document.getElementById('records-body');body.replaceChildren();let custom=[];try{custom=JSON.parse(localStorage.getItem('khit-o-custom-v1')||'[]');}catch(e){}const rows=readRecords().map(r=>({...r,name:r.type==='preset'?LEVELS[r.id]?.name:r.type==='photo'?photoRecordNames.get(r.id.split('|')[0])&&photoRecordNames.get(r.id.split('|')[0])+' · '+r.id.split('|')[1]:custom.find(x=>x.id===r.id)?.name})).filter(r=>r.name).sort((a,b)=>a.type.localeCompare(b.type)||a.name.localeCompare(b.name,'vi')||a.count-b.count);for(const r of rows){const tr=document.createElement('tr');for(const value of [r.name+(r.type==='custom'?' (tự tạo)':''),r.count,formatTime(r.time)]){const td=document.createElement('td');td.textContent=value;tr.append(td);}body.append(tr);}document.getElementById('records-empty').hidden=rows.length>0;document.getElementById('records').classList.add('show');document.getElementById('records-close').focus();}
+function showRecords(){const body=document.getElementById('records-body');body.replaceChildren();let custom=[];try{custom=JSON.parse(localStorage.getItem('khit-o-custom-v1')||'[]');}catch(e){}const rows=readRecords().map(r=>({...r,name:r.type==='preset'?(LEVELS[r.id.split('|')[0]]?.name+(r.id.includes('|')?' · Tổ hợp '+r.id.split('|')[1]:'')):r.type==='photo'?photoRecordNames.get(r.id.split('|')[0])&&photoRecordNames.get(r.id.split('|')[0])+' · '+r.id.split('|')[1]:custom.find(x=>x.id===r.id)?.name})).filter(r=>r.name).sort((a,b)=>a.type.localeCompare(b.type)||a.name.localeCompare(b.name,'vi')||a.count-b.count);for(const r of rows){const tr=document.createElement('tr');for(const value of [r.name+(r.type==='custom'?' (tự tạo)':''),r.count,formatTime(r.time)]){const td=document.createElement('td');td.textContent=value;tr.append(td);}body.append(tr);}document.getElementById('records-empty').hidden=rows.length>0;document.getElementById('records').classList.add('show');document.getElementById('records-close').focus();}
 document.getElementById('records-open').onclick=showRecords;
 document.getElementById('records-close').onclick=()=>{document.getElementById('records').classList.remove('show');document.getElementById('records-open').focus();};
 document.getElementById('records').addEventListener('click',e=>{if(e.target===e.currentTarget)document.getElementById('records-close').click();});
@@ -387,27 +387,95 @@ function buildChoices(all,def){
   }
   return found;
 }
-function startLevel(name,requestedCount=null,refreshChoices=false){
-  const isSameLevel=name===startLevel.lastLevel;level=name;let def=LEVELS[level];cols=Math.max(...def.mask.map(r=>r.length));rows=def.mask.length;
-  const all=[];for(let y=0;y<rows;y++)for(let x=0;x<def.mask[y].length;x++)if(def.mask[y][x]==='#')all.push({x,y});
-  maskSet=new Set(all.map(p=>key(p.x,p.y)));
-  if(refreshChoices||name!==startLevel.lastLevel||!partitionChoices.size){
-    partitionChoices=buildChoices(all,def);
-    startLevel.lastLevel=name;
+// Bộ đề v1: sinh từ mã cố định, không phụ thuộc Math.random hay thiết bị.
+// Đây là không gian mã đề rất lớn, KHÔNG phải phép liệt kê toàn bộ phân hoạch toán học.
+const COMBO_VERSION=1;
+let combinationIndex=1;
+const combinationCache=new Map();
+function seededRandom(seed){let a=seed>>>0;return ()=>{a=(a+0x6D2B79F5)>>>0;let t=a;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return ((t^(t>>>14))>>>0)/4294967296;};}
+function comboSeed(name,count,index,attempt=0){let h=2166136261;for(const ch of `KHITO-${COMBO_VERSION}|${name}|${count}|${index}|${attempt}`){h^=ch.charCodeAt(0);h=Math.imul(h,16777619);}return h>>>0;}
+function comboShuffle(items,rng){const a=[...items];for(let i=a.length-1;i>0;i--){const j=Math.floor(rng()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function comboSignature(groups){return groups.map(g=>g.map(p=>key(p.x,p.y)).sort().join(';')).sort().join('|');}
+function generateFixedGroups(all,name,count,index){
+  const cacheKey=`${name}/${count}/${index}`;
+  if(combinationCache.has(cacheKey))return combinationCache.get(cacheKey);
+  if(!Number.isSafeInteger(index)||index<1)throw Error('Số tổ hợp không hợp lệ.');
+  if(count<2||count>Math.floor(all.length/2))throw Error('Số mảnh không phù hợp với hình.');
+  const byKey=new Map(all.map(p=>[key(p.x,p.y),p]));
+  for(let attempt=0;attempt<96;attempt++){
+    const rng=seededRandom(comboSeed(name,count,index,attempt));
+    const root=all[Math.floor(rng()*all.length)],seen=new Set([key(root.x,root.y)]),tree=[],front=[root];
+    while(front.length){
+      const at=Math.floor(rng()*front.length),p=front[at];
+      const options=comboShuffle(neighbors(p).filter(q=>byKey.has(key(q.x,q.y))&&!seen.has(key(q.x,q.y))),rng);
+      if(!options.length){front.splice(at,1);continue;}
+      const next=options[0];seen.add(key(next.x,next.y));tree.push([key(p.x,p.y),key(next.x,next.y)]);front.push(byKey.get(key(next.x,next.y)));
+    }
+    if(seen.size!==all.length)continue;
+    const edges=comboShuffle(tree,rng),cuts=new Set();
+    // Chia cây thành đúng count thành phần liên thông, mỗi mảnh ít nhất 2 ô.
+    for(let step=1;step<count;step++){
+      let best=null;
+      for(const [a,b] of edges){
+        const edgeKey=[a,b].sort().join('|');if(cuts.has(edgeKey))continue;
+        const adjacency=new Map(all.map(p=>[key(p.x,p.y),[]]));
+        for(const [u,v] of tree){const k=[u,v].sort().join('|');if(k===edgeKey||cuts.has(k))continue;adjacency.get(u).push(v);adjacency.get(v).push(u);}
+        const walk=(seed)=>{const found=new Set([seed]),q=[seed];while(q.length){for(const v of adjacency.get(q.pop()))if(!found.has(v)){found.add(v);q.push(v);}}return found;};
+        const left=walk(a),right=walk(b);
+        if(left.size<2||right.size<2||left.has(b))continue;
+        const score=Math.abs(left.size-right.size)+rng()*all.length*.6;
+        if(!best||score<best.score)best={edgeKey,score};
+      }
+      if(!best)break;
+      cuts.add(best.edgeKey);
+    }
+    if(cuts.size!==count-1)continue;
+    const adj=new Map(all.map(p=>[key(p.x,p.y),[]]));
+    for(const [a,b] of tree)if(!cuts.has([a,b].sort().join('|'))){adj.get(a).push(b);adj.get(b).push(a);}
+    const remaining=new Set(byKey.keys()),groups=[];
+    while(remaining.size){const seed=remaining.values().next().value,q=[seed],group=[];remaining.delete(seed);while(q.length){const k=q.pop();group.push(byKey.get(k));for(const n of adj.get(k))if(remaining.delete(n))q.push(n);}groups.push(group);}
+    if(groups.length!==count||groups.some(g=>g.length<2))continue;
+    // Sắp xếp mảnh ổn định theo ô đầu tiên trên bảng, không theo thứ tự duyệt cây.
+    groups.sort((a,b)=>Math.min(...a.map(p=>p.y*100+p.x))-Math.min(...b.map(p=>p.y*100+p.x)));
+    combinationCache.set(cacheKey,groups);return groups;
   }
-  const counts=[...partitionChoices.keys()].sort((a,b)=>a-b);
-  if(!counts.length){const fallback=[all];partitionChoices.set(fallback.length,fallback);counts.push(fallback.length);}
-  chosenCount=requestedCount!==null&&partitionChoices.has(Number(requestedCount))?Number(requestedCount):
-    (isSameLevel&&partitionChoices.has(chosenCount)?chosenCount:counts[Math.floor(counts.length/2)]);
-  fillPieceCounts($('piece-number'),counts,chosenCount);
-  const groups=partitionChoices.get(chosenCount);
-  pieces=groups.map((group,i)=>{
-    const minX=Math.min(...group.map(p=>p.x)),minY=Math.min(...group.map(p=>p.y));
-    return {id:i+1,base:group.map(({x,y})=>({x:x-minX,y:y-minY})),solution:{x:minX,y:minY},rot:rand(4),flip:Math.random()>.5,placement:null,color:PALETTE[i%PALETTE.length]};
-  });
-  pieces=shuffle(pieces);selectedId=pieces[0]?.id??null;history=[];drag=null;hoverPos=null;gameStarted=0;gameFinished=false;elapsedAtWin=0;clearHint();$('victory').classList.remove('show');
-  resizeBoard();render();
+  throw Error('Chưa tạo được tổ hợp này. Hãy chọn số khác.');
 }
+function fixedPieceOrder(name,count,index){const rng=seededRandom(comboSeed(name,count,index,997));return rng;}
+function comboCode(){return `KO${COMBO_VERSION}-${level.toUpperCase()}-${String(chosenCount).padStart(2,'0')}-${combinationIndex}`;}
+function syncComboControls(){
+  $('combination-id').value=combinationIndex;
+  $('combination-prev').disabled=combinationIndex<=1;
+  $('combination-code').textContent='Mã đề: '+comboCode();
+}
+function startLevel(name,requestedCount=null,refreshChoices=false,requestedIndex=null){
+  const def=LEVELS[name];if(!def)return;
+  const all=[];for(let y=0;y<def.mask.length;y++)for(let x=0;x<def.mask[y].length;x++)if(def.mask[y][x]==='#')all.push({x,y});
+  const counts=Array.from({length:15},(_,i)=>i+2).filter(n=>n<=Math.floor(all.length/2));
+  const count=counts.includes(Number(requestedCount))?Number(requestedCount):(name===level&&counts.includes(chosenCount)?chosenCount:Math.min(8,counts[counts.length-1]));
+  const index=requestedIndex===null?(name===level&&count===chosenCount?combinationIndex:1):Number(requestedIndex);
+  // Chuẩn bị đề trước khi thay đổi ván đang chơi.
+  const groups=generateFixedGroups(all,name,count,index);
+  const rng=fixedPieceOrder(name,count,index);
+  const nextPieces=groups.map((group,i)=>{
+    const minX=Math.min(...group.map(p=>p.x)),minY=Math.min(...group.map(p=>p.y));
+    return {id:i+1,base:group.map(({x,y})=>({x:x-minX,y:y-minY})),solution:{x:minX,y:minY},rot:Math.floor(rng()*4),flip:rng()>.5,placement:null,color:PALETTE[i%PALETTE.length]};
+  });
+  level=name;chosenCount=count;combinationIndex=index;cols=Math.max(...def.mask.map(r=>r.length));rows=def.mask.length;
+  maskSet=new Set(all.map(p=>key(p.x,p.y)));partitionChoices=new Map([[count,groups]]);
+  pieces=comboShuffle(nextPieces,rng);selectedId=pieces[0]?.id??null;history=[];drag=null;hoverPos=null;gameStarted=0;gameFinished=false;elapsedAtWin=0;
+  clearHint();$('victory').classList.remove('show');fillPieceCounts($('piece-number'),counts,count);syncComboControls();resizeBoard();render();
+}
+function openCombination(index){
+  const apply=()=>{try{startLevel(level,chosenCount,false,index);showToast('Đã mở '+comboCode());}catch(error){showToast(error.message);syncComboControls();}};
+  confirmNewSet(apply,'Bạn có muốn chuyển sang tổ hợp khác không?',!gameFinished&&!!(gameStarted||history.length));
+}
+$('combination-prev').onclick=()=>openCombination(combinationIndex-1);
+$('combination-next').onclick=()=>openCombination(combinationIndex+1);
+$('combination-apply').onclick=()=>openCombination(Number($('combination-id').value));
+$('combination-id').addEventListener('keydown',e=>{if(e.key==='Enter')openCombination(Number(e.target.value));});
+$('combination-copy').onclick=async()=>{const code=comboCode();try{await navigator.clipboard.writeText(code);showToast('Đã sao chép '+code);}catch(e){showToast('Mã đề: '+code);}};
+
 function resizeBoard(){
   const stage=$('board-stage');if(!stage.clientWidth)return;let available=Math.max(260,stage.clientWidth-36);cell=Math.floor(Math.min(48,available/cols,435/rows));cell=Math.max(20,cell);
   elBoard.style.setProperty('--cell',cell+'px');elBoard.style.width=(cols*cell)+'px';elBoard.style.height=(rows*cell)+'px';
@@ -465,7 +533,7 @@ function clearHint(){clearTimeout(hintTimeout);currentHint=null;elHint.replaceCh
 function checkVictory(){
   if(pieces.some(p=>!p.placement)||occupancy().size!==maskSet.size)return;
   gameFinished=true;khitSound('win');elapsedAtWin=elapsed();
-  showVictory('',{type:'preset',id:level,count:pieces.length,time:elapsedAtWin,confetti:true});renderTray();
+  showVictory('',{type:'preset',id:level+'|'+combinationIndex,count:pieces.length,time:elapsedAtWin,confetti:true});renderTray();
 }
 function place(piece,x,y){
   if(gameFinished||!piece)return false;
@@ -607,7 +675,7 @@ function onBoardClick(e){
   const p=pieces.find(p=>p.id===selectedId);if(!p||p.placement)return;
   const anchor=getAnchor(e.clientX,e.clientY,p);place(p,anchor.x,anchor.y);
 }
-$('piece-number').addEventListener('change',e=>{startLevel(level,Number(e.target.value));showToast('Đã tạo ván mới với '+chosenCount+' mảnh!');});
+$('piece-number').addEventListener('change',e=>{startLevel(level,Number(e.target.value),false,1);showToast('Đã tạo ván mới với '+chosenCount+' mảnh!');});
 $('piece-grid').addEventListener('pointerdown',onPointerDown);
 elBoard.addEventListener('pointerdown',onPointerDown);
 window.addEventListener('pointermove',onPointerMove,{passive:true});
@@ -617,9 +685,9 @@ elBoard.addEventListener('pointermove',onBoardMove);
 elBoard.addEventListener('pointerleave',()=>{if(!drag){hoverPos=null;renderPreview();}});
 elBoard.addEventListener('click',onBoardClick);
 $('rotate').addEventListener('click',()=>rotateOrFlip('rotate'));$('flip').addEventListener('click',()=>rotateOrFlip('flip'));$('undo').addEventListener('click',undo);
-$('hint').addEventListener('click',hint);$('reset').addEventListener('click',()=>confirmNewSet(reset,'Bạn có muốn chơi lại từ đầu không?',!gameFinished&&!!(gameStarted||history.length)));$('new').addEventListener('click',()=>confirmNewSet(()=>{startLevel(level,chosenCount,true);showToast('Đã tạo bộ mảnh mới, chắc chắn có lời giải!');},undefined,!gameFinished&&!!(gameStarted||history.length)));
+$('hint').addEventListener('click',hint);$('reset').addEventListener('click',()=>confirmNewSet(reset,'Bạn có muốn chơi lại từ đầu không?',!gameFinished&&!!(gameStarted||history.length)));$('new').addEventListener('click',()=>confirmNewSet(()=>{startLevel(level,chosenCount,false,combinationIndex+1);showToast('Đã chuyển sang '+comboCode());},undefined,!gameFinished&&!!(gameStarted||history.length)));
 $('victory-close').addEventListener('click',()=>$('victory').classList.remove('show'));
-$('victory-new').addEventListener('click',()=>{startLevel(level,chosenCount,true);showToast('Bắt đầu một ván mới!');});
+$('victory-new').addEventListener('click',()=>{startLevel(level,chosenCount,false,combinationIndex+1);showToast('Bắt đầu '+comboCode());});
 // Preset selection is handled after the original layout is visible (see showOriginal).
 window.addEventListener('keydown',e=>{if(document.getElementById('preset-game').hidden)return;
   if(e.altKey||e.ctrlKey||e.metaKey||e.target.closest('input,textarea,[contenteditable=true]'))return;
@@ -629,13 +697,13 @@ window.addEventListener('resize',()=>{if($('board-stage').clientWidth){resizeBoa
 // Recalculate when the board becomes visible or its container changes width.
 if(typeof ResizeObserver!=='undefined'){let lastWidth=0;new ResizeObserver(()=>{const width=$('board-stage').clientWidth;if(!width){lastWidth=0;return;}if(width!==lastWidth){lastWidth=width;resizeBoard();}}).observe($('board-stage'));}
 function capturePresetSession(){
-  return {level,chosenCount,pieces:structuredClone(pieces),selectedId,history:structuredClone(history),elapsed:gameFinished?elapsedAtWin:elapsed(),hasStarted:!!gameStarted,finished:gameFinished,choices:[...partitionChoices]};
+  return {level,chosenCount,combinationIndex,pieces:structuredClone(pieces),selectedId,history:structuredClone(history),elapsed:gameFinished?elapsedAtWin:elapsed(),hasStarted:!!gameStarted,finished:gameFinished,choices:[...partitionChoices]};
 }
 function restorePresetSession(state){
   startLevel(state.level,state.chosenCount);
   partitionChoices=new Map(state.choices);pieces=state.pieces;chosenCount=state.chosenCount;selectedId=state.selectedId;history=state.history||[];
   gameFinished=state.finished;elapsedAtWin=state.elapsed;gameStarted=state.hasStarted?performance.now()-state.elapsed*1000:0;
-  fillPieceCounts($('piece-number'),[...partitionChoices.keys()].sort((a,b)=>a-b),chosenCount);clearHint();resizeBoard();render();
+  fillPieceCounts($('piece-number'),Array.from({length:15},(_,i)=>i+2).filter(n=>n<=Math.floor(maskSet.size/2)),chosenCount);syncComboControls();clearHint();resizeBoard();render();
 }
 startLevel('cross');
 </script>
@@ -813,7 +881,7 @@ function setGameView(view){
   customGestures.cancel();presetGestures.cancel();stopDrag();
   for(const id of ['victory','custom-victory'])$(id).classList.remove('show');
   const isPreset=view==='preset';
-  original.hidden=!isPreset;original.style.display=isPreset?'':'none';foot.style.display=isPreset?'':'none';
+  $('preset-combination').hidden=!isPreset;original.hidden=!isPreset;original.style.display=isPreset?'':'none';foot.style.display=isPreset?'':'none';
   $c('wrap').hidden=view!=='custom';photoPanel.hidden=view!=='photo';
   if(view!=='custom')$('photo-game-tools').hidden=true;
   updateSessionButtons();
@@ -830,7 +898,7 @@ createButton.onclick=()=>{
 preset.addEventListener('change',()=>{
   const name=preset.value;
   if(!name||!LEVELS[name]){if($c('wrap').hidden)preset.value=level;return;}
-  showOriginal(name);startLevel(name,null,true);
+  showOriginal(name);startLevel(name,null,false,1);
 });
 savedMenu.addEventListener('change',()=>{
   const id=savedMenu.value;if(!id)return;
